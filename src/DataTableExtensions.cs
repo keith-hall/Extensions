@@ -1,4 +1,47 @@
 public static class DataTableExtensions {
+	public static DataTable ToDataTable (this IEnumerable<IDictionary<string, object>> csv, string name = null) {
+		var result = new DataTable(name);
+		if (! csv.Any())
+			return result;
+		
+		var csvList = csv.ToList();
+		(csvList.First() as IDictionary<string, object>).Select(e => e.Key).ToList().ForEach(e => result.Columns.Add(e.ToString()));
+		
+		csvList.ForEach(r => result.Rows.Add((r as IDictionary<string, object>).Values.ToArray()));
+		
+		return result;
+	}
+	
+	public static IEnumerable<System.Dynamic.ExpandoObject> FromCSVEnumerable (IEnumerable<IEnumerable<string>> csv) {
+		var headers = csv.First().ToArray();
+		
+		foreach (var row in csv.Skip(1))
+		{
+			var obj = new System.Dynamic.ExpandoObject();
+			var ret = obj as IDictionary<string,object>;
+			
+			//for (int i = 0; i < headers.Length; i++)
+			//	ret.Add(headers[i], row.ElementAt(i));
+			var zipped = headers.Zip(row, (header, value) => new KeyValuePair<string, object>(header, value));
+			foreach (var kvp in zipped)
+				ret.Add(kvp);
+			
+			yield return obj;
+		}
+	}
+	
+	public static IEnumerable<string[]> OpenCSV (string path, string separator) { //http://msdn.microsoft.com/en-us/library/microsoft.visualbasic.fileio.textfieldparser.aspx
+		using (var tfp = new Microsoft.VisualBasic.FileIO.TextFieldParser(path)) {
+			tfp.TextFieldType = Microsoft.VisualBasic.FileIO.FieldType.Delimited;
+			tfp.SetDelimiters(separator);
+			
+			while (! tfp.EndOfData)
+				yield return tfp.ReadFields();
+			
+			tfp.Close();
+		}
+	}
+	
 	public static string TableToSQLInsert (this DataTable dt, string tableName, bool createTable) {
 		var sql = "insert into " + tableName + " (" +
 			string.Join(", ", dt.Columns.OfType<DataColumn>().Select(
