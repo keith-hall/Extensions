@@ -5,7 +5,8 @@ public static class DataTableExtensions {
 			return result;
 		
 		var csvList = csv.ToList();
-		(csvList.First() as IDictionary<string, object>).Select(e => e.Key).ToList().ForEach(e => result.Columns.Add(e.ToString()));
+		foreach (var k in csvList.First() as IDictionary<string, object>).Select(e => e.Key))
+			result.Columns.Add(k.ToString())
 		
 		csvList.ForEach(r => result.Rows.Add((r as IDictionary<string, object>).Values.ToArray()));
 		
