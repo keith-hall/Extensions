@@ -92,8 +92,11 @@ public static class DataTableExtensions {
 			}
 			if (xr.NodeType == XmlNodeType.EndElement ||
 				(xr.NodeType == XmlNodeType.Element && xr.IsEmptyElement) ||
-				xr.NodeType == XmlNodeType.Attribute)
+				xr.NodeType == XmlNodeType.Attribute) {
 				stack.Pop();
+				if (xr.NodeType == XmlNodeType.EndElement && xr.Name == row)
+					currentRow = null;
+			}
 		};
 		
 		while (xr.Read()) {
