@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 public static class StringExtensions {
 	public static int IndexOfEnd (this string value, string find, int? start = null) {
 		var pos = value.IndexOf(find, start.HasValue ? start.Value : 0);
