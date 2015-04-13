@@ -84,11 +84,10 @@ public static class DataTableExtensions {
 		if (value == null)
 			return @"null";
 		
-		Func<DateTime, string> toDateString = dt => @"'" + dt.ToString(@"yyyy-MM-ddTHH:mm:ss.fff", CultureInfo.InvariantCulture) + "'"; // ISO-8601 date format
 		Func<bool, string> toBoolString = b => b ? @"1" : @"0";
 		
 		if (value is DateTime)
-			return toDateString((DateTime)value);
+			return ((DateTime)value).ToISO8601String();
 		if (value is bool)
 			return toBoolString((bool)value);
 		
@@ -101,7 +100,7 @@ public static class DataTableExtensions {
 			float valAsFloat;
 			
 			if (DateTime.TryParse(val, out valAsDate))
-				return toDateString(valAsDate);
+				return valAsDate.ToISO8601String();
 			if (val.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase) || val.Equals(bool.TrueString, StringComparison.InvariantCultureIgnoreCase))
 				return toBoolString(bool.Parse(val));
 			if (val.Length < 7 && float.TryParse(val, out valAsFloat)) // check if it is a number stored in a string value
