@@ -1,4 +1,14 @@
 public static class DataTableExtensions {
+	public static DataTable CSVToDataTable (string path, string separator) {
+		var csv = OpenCSV(path, separator).ToList();
+		var dt = new DataTable(path);
+		foreach (var header in csv.First())
+			dt.Columns.Add(header);
+		foreach (var values in csv.Skip(1))
+			dt.Rows.Add(values);
+		return dt;
+	}
+	
 	public static DataTable ToDataTable (this IEnumerable<IDictionary<string, object>> csv, string name = null) {
 		var result = new DataTable(name);
 		if (! csv.Any())
