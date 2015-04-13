@@ -12,4 +12,8 @@ public static EnumerableExtensions {
 			}
 		}
 	}
+	
+	public static bool CountExceeds<T> (this IEnumerable<T> enumerable, int count) {
+		return enumerable.Take(count + 1).Count() > count;
+	}
 }
