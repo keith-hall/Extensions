@@ -90,6 +90,8 @@ public static class DataTableExtensions {
 			return ((DateTime)value).ToISO8601String();
 		if (value is bool)
 			return toBoolString((bool)value);
+		if (value is System.Byte[])
+			return @"0x" + (new SoapHexBinary(value as System.Byte[]).ToString());
 		
 		var val = value.ToString();
 		if (value is int || value is float || value is double)
