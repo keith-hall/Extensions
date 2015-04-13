@@ -33,13 +33,15 @@ public static class DataTableExtensions {
 	
 	public static IEnumerable<string[]> OpenCSV (string path, string separator) { //http://msdn.microsoft.com/en-us/library/microsoft.visualbasic.fileio.textfieldparser.aspx
 		using (var tfp = new Microsoft.VisualBasic.FileIO.TextFieldParser(path)) {
-			tfp.TextFieldType = Microsoft.VisualBasic.FileIO.FieldType.Delimited;
-			tfp.SetDelimiters(separator);
-			
-			while (! tfp.EndOfData)
-				yield return tfp.ReadFields();
-			
-			tfp.Close();
+			try {
+				tfp.TextFieldType = Microsoft.VisualBasic.FileIO.FieldType.Delimited;
+				tfp.SetDelimiters(separator);
+				
+				while (! tfp.EndOfData)
+					yield return tfp.ReadFields();
+			} finally {
+				tfp.Close();
+			}
 		}
 	}
 	
