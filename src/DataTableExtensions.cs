@@ -44,8 +44,8 @@ public static class DataTableExtensions
 			var obj = new System.Dynamic.ExpandoObject();
 			var ret = obj as IDictionary<string, object>;
 
-			//for (int i = 0; i < headers.Length; i++)
-			//	ret.Add(headers[i], row.ElementAt(i));
+			//x for (int i = 0; i < headers.Length; i++)
+			//x 	ret.Add(headers[i], row.ElementAt(i));
 			var zipped = headers.Zip(row, (header, value) => new KeyValuePair<string, object>(header, value));
 			foreach (var kvp in zipped)
 				ret.Add(kvp);
