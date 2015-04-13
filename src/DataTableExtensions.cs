@@ -66,7 +66,7 @@ public static class DataTableExtensions {
 		float tmp;
 		sql += " (" + string.Join(")\r\n,(", dt.Rows.OfType<DataRow>().Select(
 			row => string.Join(", ", dt.Columns.OfType<DataColumn>().Select(
-				col => (row[col].ToString().Length < 7 && float.TryParse(row[col].ToString(), out tmp)) ? row[col].ToString() : ("'" + row[col].ToString().Replace("'", "''") + "'") // determine if number or not
+				col => GetValueForSQL(row[col], true)
 			)))
 		) + ")";
 		
@@ -78,6 +78,36 @@ public static class DataTableExtensions {
 		}
 		
 		return sql;
+	}
+	
+	public static string GetValueForSQL (object value, bool tryConvertFromString) {
+		if (value == null)
+			return @"null";
+		
+		Func<DateTime, string> toDateString = dt => @"'" + dt.ToString(@"yyyy-MM-ddTHH:mm:ss.fff", CultureInfo.InvariantCulture) + "'"; // ISO-8601 date format
+		Func<bool, string> toBoolString = b => b ? @"1" : @"0";
+		
+		if (value is DateTime)
+			return toDateString((DateTime)value);
+		if (value is bool)
+			return toBoolString((bool)value);
+		
+		var val = value.ToString();
+		if (value is int || value is float || value is double)
+			return val;
+		
+		if (tryConvertFromString) {
+			DateTime valAsDate;
+			float valAsFloat;
+			
+			if (DateTime.TryParse(val, out valAsDate))
+				return toDateString(valAsDate);
+			if (val.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase) || val.Equals(bool.TrueString, StringComparison.InvariantCultureIgnoreCase))
+				return toBoolString(bool.Parse(val));
+			if (val.Length < 7 && float.TryParse(val, out valAsFloat)) // check if it is a number stored in a string value
+				return val;
+		}
+		return @"'" + val.Replace(@"'", @"''") + @"'"; // escape the value
 	}
 	#endregion
 	
