@@ -131,54 +131,57 @@ public static class DataTableExtensions {
 		var dt = new DataTable();
 		DataRow currentRow = null;
 		
-		Action process = () => {
-			if (xr.HasValue && ! string.IsNullOrWhiteSpace(xr.Value) && xr.NodeType != XmlNodeType.Comment) {
-				var col = string.Join("/", stack.TakeWhile(v => !v.Equals(row)));
+		Action<string> process = (name) => {
+			if (xr.HasValue && ! string.IsNullOrWhiteSpace(xr.Value)) {
+				var level = stack.TakeWhile(v => !v.Equals(row));
+				if (name != null)
+					level = Enumerable.Concat(new [] { name }, level);
+				var col = string.Join("/", level);
 				if (! dt.Columns.Contains(col))
 					dt.Columns.Add(col);
 				
 				if (currentRow != null)
 					currentRow.SetField(col, xr.Value);
 			}
-			if (xr.NodeType == XmlNodeType.EndElement ||
-				(xr.NodeType == XmlNodeType.Element && xr.IsEmptyElement) ||
-				xr.NodeType == XmlNodeType.Attribute) {
-				stack.Pop();
-				if (xr.NodeType == XmlNodeType.EndElement && xr.Name == row)
-					currentRow = null;
-			}
 		};
 		
 		while (xr.Read()) {
-			if (xr.NodeType == XmlNodeType.Element) {
-				if (String.IsNullOrEmpty(dt.TableName))
-					dt.TableName = xr.Name;
-				
-				stack.Push(xr.Name);
-				if (xr.Name == row) {
-					currentRow = dt.NewRow();
-					dt.Rows.Add(currentRow);
+			if (xr.NodeType != XmlNodeType.Comment) {
+				if (xr.NodeType == XmlNodeType.Element) {
+					if (String.IsNullOrEmpty(dt.TableName))
+						dt.TableName = xr.Name;
+					
+					if (xr.Name == row) {
+						currentRow = dt.NewRow();
+						dt.Rows.Add(currentRow);
+					}
+					if (currentRow != null)
+						stack.Push(xr.Name);
+				}
+				if (currentRow != null && xr.HasAttributes && includeAttributes) {
+					xr.MoveToFirstAttribute();
+					do {
+						process("@" + xr.Name);
+					} while (xr.MoveToNextAttribute());
+					xr.MoveToElement();
+				}
+				if (currentRow != null) {
+					process(null);
+					if (xr.NodeType == XmlNodeType.EndElement || xr.IsEmptyElement) {
+						if (xr.Name == row)
+							currentRow = null;
+						if (stack.Any())
+							stack.Pop();
+					}
 				}
 			}
-			if (xr.HasAttributes && includeAttributes) {
-				xr.MoveToFirstAttribute();
-				do {
-					stack.Push(stack.Peek() + "@" + xr.Name);
-					process();
-				} while (xr.MoveToNextAttribute());
-				xr.MoveToElement();
-			}
-			process();
 		}
 		xr.Close();
 		
 		if (shortNames) {
 			var cols = dt.Columns.OfType<DataColumn>().Select(dc => new { Column = dc, FullName = dc.ColumnName, ShortName = dc.ColumnName.Split('/').First() }).GroupBy(c => c.ShortName).Where(g => g.Count() == 1).Select (g => g.First());
 			foreach (var col in cols)
-				//try {
-					col.Column.ColumnName = col.ShortName;
-				//} catch (DuplicateNameException) { // TODO: instead, only rename the columns that won't clash
-				//}
+				col.Column.ColumnName = col.ShortName;
 		}
 		return dt;
 	}
