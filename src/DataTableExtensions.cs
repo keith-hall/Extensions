@@ -1,4 +1,5 @@
 public static class DataTableExtensions {
+	#region CSV
 	public static DataTable CSVToDataTable (string path, string separator) {
 		var csv = OpenCSV(path, separator).ToList();
 		var dt = new DataTable(path);
@@ -54,7 +55,9 @@ public static class DataTableExtensions {
 			}
 		}
 	}
+	#endregion
 	
+	#region SQL
 	public static string TableToSQLInsert (this DataTable dt, string tableName, bool createTable) {
 		var sql = "insert into " + tableName + " (" +
 			string.Join(", ", dt.Columns.OfType<DataColumn>().Select(
@@ -76,7 +79,9 @@ public static class DataTableExtensions {
 		
 		return sql;
 	}
+	#endregion
 	
+	#region Data Table Filters
 	public static DataTable Filter (this DataTable table, string filter) {
 		return table.Filter(table.Select(filter));
 	}
@@ -87,7 +92,9 @@ public static class DataTableExtensions {
 			filtered.Rows.Add(row.ItemArray);
 		return filtered;
 	}
+	#endregion
 	
+	#region XML
 	public static DataTable ReadXML (XmlReader xr, string row, bool shortNames, bool includeAttributes) {
 		var stack = new Stack<string>();
 		var dt = new DataTable();
@@ -95,7 +102,7 @@ public static class DataTableExtensions {
 		
 		Action process = () => {
 			if (xr.HasValue && ! string.IsNullOrWhiteSpace(xr.Value) && xr.NodeType != XmlNodeType.Comment) {
-				var col = string.Join("/", stack);
+				var col = string.Join("/", stack.TakeWhile(v => !v.Equals(row)));
 				if (! dt.Columns.Contains(col))
 					dt.Columns.Add(col);
 				
@@ -144,4 +151,5 @@ public static class DataTableExtensions {
 		}
 		return dt;
 	}
+	#endregion
 }
