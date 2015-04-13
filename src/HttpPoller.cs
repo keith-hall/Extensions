@@ -1,12 +1,20 @@
-public static class HttpPoller {
-	public struct ResponseDetails {
+using System;
+using System.Net;
+using System.Reactive.Linq;
+
+public static class HttpPoller
+{
+	public struct ResponseDetails
+	{
 		public WebHeaderCollection Headers;
 		public string Text;
 	}
-	
-	public static IObservable<ResponseDetails> PollURL (string url, TimeSpan frequency, Func<WebClient> createWebClient = null) {
+
+	public static IObservable<ResponseDetails> PollURL(string url, TimeSpan frequency, Func<WebClient> createWebClient = null)
+	{
 		createWebClient = createWebClient ?? (() => new WebClient());
-		Func<ResponseDetails> download = () => {
+		Func<ResponseDetails> download = () =>
+		{
 			var wc = createWebClient();
 			return new ResponseDetails { Text = wc.DownloadString(url), Headers = wc.ResponseHeaders };
 		};
