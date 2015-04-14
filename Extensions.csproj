@@ -6,9 +6,9 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{2D28375A-9D70-470D-BA42-64399B1B5F11}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Extensions</RootNamespace>
-    <AssemblyName>Extensions</AssemblyName>
+    <AppDesignerFolder>src\Properties</AppDesignerFolder>
+    <RootNamespace>HallLibrary.Extensions</RootNamespace>
+    <AssemblyName>HallLibrary.Extensions</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
