@@ -22,4 +22,11 @@ public static class EnumerableExtensions
 	{
 		return enumerable.Take(count + 1).Count() > count;
 	}
+	
+	public static IEnumerable<T> AsSingleEnumerable<T> (this T value)
+	{
+		
+		//x return Enumerable.Repeat(value, 1);
+		return new [] { value };
+	}
 }
