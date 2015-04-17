@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 namespace HallLibrary.Extensions {
-	public static class WcfExtensions {
+	public static class WcfConsumerExtensions {
 		public static TReturn CallWCFMethodWithHeaders<TChannel, TReturn> (TChannel channel, IEnumerable<System.ServiceModel.Channels.MessageHeader> headers, Func<TChannel, TReturn> callWCFMethod) {
 			using (var ocs = new OperationContextScope((System.ServiceModel.IContextChannel)channel)) {
 				foreach (var header in headers)
