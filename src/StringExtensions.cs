@@ -97,7 +97,7 @@ namespace HallLibrary.Extensions
 		/// <exception cref="ArgumentNullException"><paramref name="find" /> is <c>null</c>.</exception>
 		public static int CountOccurrences(this string value, string find)
 		{
-			return value.AllIndexesOf(find).AsParallel().Count();
+			return value.AllIndexesOf(find).Count();
 		}
 
 		/// <summary>
