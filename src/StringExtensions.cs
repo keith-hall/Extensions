@@ -1,18 +1,23 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace HallLibrary.Extensions
 {
+	/// <summary>
+	/// Contains extension methods for working with <see cref="System.String" /> objects
+	/// </summary>
 	public static class StringExtensions
 	{
 		/// <summary>
-		/// Reports the zero-based index of the <i>end</i> of the first occurrence of the specified string in the current <see cref="System.String" /> object.
+		/// Reports the zero-based index of the <i>end</i> of the first occurrence of the specified <paramref name="find" /> string in the current <see cref="System.String" /> object.
 		/// </summary>
 		/// <param name="value">The string to search in.</param>
 		/// <param name="find">The string to seek.</param>
 		/// <param name="startIndex">The search starting position.</param>
-		/// <returns>Reports the zero-based index of the <i>end</i> of the first occurrence of the specified string in the current <see cref="System.String" /> object.</returns>
+		/// <returns>Reports the zero-based index of the <i>end</i> of the first occurrence of the specified <paramref name="find" /> string in the current <see cref="System.String" /> object.</returns>
 		/// <exception cref="ArgumentOutOfRangeException"><paramref name="startIndex" /> is less than 0 (zero) or greater than the length of this string.</exception>
 		public static int IndexOfEnd(this string value, string find, int? startIndex = null)
 		{
@@ -23,31 +28,59 @@ namespace HallLibrary.Extensions
 		}
 
 		/// <summary>
-		/// Reports the zero-based indexes of all the occurrences of the specified strings in the current <see cref="System.String" /> object.
+		/// Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> string in the current <see cref="System.String" /> object.
 		/// </summary>
 		/// <param name="value">The string to search in.</param>
-		/// <param name="find">The strings to seek.</param>
-		/// <returns>Reports the zero-based indexes of all the occurrences of the specified strings in the current <see cref="System.String" /> object.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="find" /> contains a <c>null</c> value.</exception>
-		public static IEnumerable<KeyValuePair<string, int>> AllIndexesOf(this string value, IEnumerable<string> find)
+		/// <param name="find">The string to seek.</param>
+		/// <returns>Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> string in the current <see cref="System.String" /> object.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="find" /> is <c>null</c>.</exception>
+		public static IEnumerable<int> AllIndexesOf(this string value, string find)
 		{
-			foreach (var search in find)
+			var pos = 0;
+			while ((pos = value.IndexOf(find, pos, StringComparison.Ordinal)) > -1)
 			{
-				var pos = 0;
-				while ((pos = value.IndexOf(search, pos, StringComparison.Ordinal)) > -1)
-				{
-					yield return new KeyValuePair<string, int>(search, pos);
-					pos += search.Length;
-				}
+				yield return pos;
+				pos += find.Length;
 			}
 		}
 
 		/// <summary>
-		/// Reports the zero-based indexes of all the occurrences of the specified strings in the current <see cref="System.String" /> object, in the order in which they appear.
+		/// Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> strings in the current <see cref="System.String" /> object.
 		/// </summary>
 		/// <param name="value">The string to search in.</param>
 		/// <param name="find">The strings to seek.</param>
-		/// <returns>Reports the zero-based indexes of all the occurrences of the specified strings in the current <see cref="System.String" /> object, in the order in which they appear.</returns>
+		/// <returns>Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> strings in the current <see cref="System.String" /> object.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="find" /> contains a <c>null</c> value.</exception>
+		/// <remarks>Note that the order in which the indexes are returned is not deterministic. See <see cref="AllSortedIndexesOf" />.</remarks>
+		public static IEnumerable<KeyValuePair<string, int>> AllIndexesOf(this string value, IEnumerable<string> find)
+		{
+			var results = new ConcurrentBag<KeyValuePair<string, int>>();
+			Parallel.ForEach(find, search =>
+								   {
+									   var r = AllIndexesOf(value, search).Select(pos => new KeyValuePair<string, int>(search, pos));
+									   Parallel.ForEach(r, kvp => results.Add(kvp)); // unable to yield return from here, so add results concurrently
+								   });
+			return results;
+		}
+		/* // alternative implementation that will keep the find indexes together
+		public static IEnumerable<KeyValuePair<string, int>> AllIndexesOf(this string value, IEnumerable<string> find)
+		{
+			var results = new ConcurrentBag<List<KeyValuePair<string, int>>>();
+			Parallel.ForEach(find, search => 
+				results.Add(new List<KeyValuePair<string, int>>(
+					AllIndexesOf(value, search)
+					.Select(pos => new KeyValuePair<string, int>(search, pos))
+				))
+			);
+			return results.SelectMany(e => e);
+		}*/
+
+		/// <summary>
+		/// Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> strings in the current <see cref="System.String" /> object, in the order in which they appear.
+		/// </summary>
+		/// <param name="value">The string to search in.</param>
+		/// <param name="find">The strings to seek.</param>
+		/// <returns>Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> strings in the current <see cref="System.String" /> object, in the order in which they appear.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="find" /> contains a <c>null</c> value.</exception>
 		public static IEnumerable<KeyValuePair<string, int>> AllSortedIndexesOf(this string value, IEnumerable<string> find)
 		{
@@ -56,15 +89,15 @@ namespace HallLibrary.Extensions
 		}
 
 		/// <summary>
-		/// Reports the number of times the specified string occurs in the current <see cref="System.String" /> object.
+		/// Reports the number of times the specified <paramref name="find" /> string occurs in the current <see cref="System.String" /> object.
 		/// </summary>
 		/// <param name="value">The string to search in.</param>
 		/// <param name="find">The string to seek.</param>
-		/// <returns>Reports the number of times the specified string occurs in the current <see cref="System.String" /> object.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="find" /> contains a <c>null</c> value.</exception>
-		public static int CountOccurrences(this string value, IEnumerable<string> find)
+		/// <returns>Reports the number of times the specified <paramref name="find" /> string occurs in the current <see cref="System.String" /> object.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="find" /> is <c>null</c>.</exception>
+		public static int CountOccurrences(this string value, string find)
 		{
-			return value.AllIndexesOf(find).Count();
+			return value.AllIndexesOf(find).AsParallel().Count();
 		}
 
 		/// <summary>
