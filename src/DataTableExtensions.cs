@@ -119,9 +119,10 @@ namespace HallLibrary.Extensions
 				return @"null";
 	
 			Func<bool, string> toBoolString = b => b ? @"1" : @"0";
+			Func<bool, string> toDateString = d => d.ToISO8601String(false, false).Substring(0, @"yyyy-MM-ddTHH:mm:ss.fff".Length);
 	
 			if (value is DateTime)
-				return ((DateTime)value).ToISO8601String(true, true);
+				return toDateString((DateTime)value);
 			if (value is bool)
 				return toBoolString((bool)value);
 			if (value is System.Byte[])
@@ -137,7 +138,7 @@ namespace HallLibrary.Extensions
 				float valAsFloat;
 	
 				if (DateTime.TryParse(val, out valAsDate))
-					return valAsDate.ToISO8601String();
+					return toDateString(valAsDate);
 				if (val.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase) || val.Equals(bool.TrueString, StringComparison.InvariantCultureIgnoreCase))
 					return toBoolString(bool.Parse(val));
 				if (val.Length < 7 && float.TryParse(val, out valAsFloat)) // check if it is a number stored in a string value
