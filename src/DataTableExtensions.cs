@@ -10,6 +10,12 @@ namespace HallLibrary.Extensions
 	public static class DataTableExtensions
 	{
 		#region CSV
+		/// <summary>
+		/// Open a CSV file <paramref name="path"/> and get it's contents respresented in a <see cref="System.Data.DataTable"/>.
+		/// </summary>
+		/// <param name="path">The path to the CSV file.</param>
+		/// <param name="separator">The field separator used in the CSV file.</param>
+		/// <returns>A <see cref="System.Data.DataTable"/> representing the contents of the CSV file.</returns>
 		public static DataTable CSVToDataTable(string path, string separator)
 		{
 			var csv = OpenCSV(path, separator).ToList();
@@ -55,7 +61,14 @@ namespace HallLibrary.Extensions
 				yield return obj;
 			}
 		}
-	
+		
+		/// <summary>
+		/// Open a CSV file at the specified <paramref name="path"/> using the specified field <paramref name="separator"/>.
+		/// </summary>
+		/// <param name="path">The path to the CSV file.</param>
+		/// <param name="separator">The field separator to use.</param>
+		/// <returns>An enumerable containing a <see cref="System.String"/> array all the fields in each row.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="path"/> or <paramref name="separator"/> is null or empty.</exception>
 		public static IEnumerable<string[]> OpenCSV(string path, string separator)
 		{ //http://msdn.microsoft.com/en-us/library/microsoft.visualbasic.fileio.textfieldparser.aspx
 			using (var tfp = new Microsoft.VisualBasic.FileIO.TextFieldParser(path))
@@ -139,7 +152,13 @@ namespace HallLibrary.Extensions
 		{
 			return table.Filter(table.Select(filter));
 		}
-	
+		
+		/// <summary>
+		/// Filter the specified <paramref name="rows"/> from the data<paramref name="table"/> into a new <see cref="System.Data.DataTable"/>.
+		/// </summary>
+		/// <param name="table">The <see cref="System.Data.DataTable"/> to filter.</param>
+		/// <param name="rows">The rows to filter.</param>
+		/// <returns>A new <see cref="System.Data.DataTable"/> containing the specified <paramref name="rows"/>.</returns>
 		public static DataTable Filter(this DataTable table, IEnumerable<DataRow> rows)
 		{
 			var filtered = table.Clone();
@@ -150,8 +169,23 @@ namespace HallLibrary.Extensions
 		#endregion
 	
 		#region XML
+		/// <summary>
+		/// Iterate through the specified <see cref="XmlReader" /> and build a <see cref="DataTable"/> from it.
+		/// </summary>
+		/// <param name="xr">The <see cref="XmlReader" /> to use to build the <see cref="DataTable"/>.</param>
+		/// <param name="row">The name of the XML element that represents a row.</param>
+		/// <param name="shortNames">Use short column names, as opposed to the path relative to the <paramref name="row"/>.</param>
+		/// <param name="includeAttributes">Include attributes in the <see cref="DataTable"/>.</param>
+		/// <returns>A <see cref="DataTable"/> representing the XML.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="row"/> is null.</exception>
+		/// <exception cref="ArgumentNullException"><paramref name="xr"/> is null.</exception>
 		public static DataTable ReadXML(XmlReader xr, string row, bool shortNames, bool includeAttributes)
 		{
+			if (string.IsNullOrEmpty(row))
+				throw new ArgumentNullException("row");
+			if (xr == null)
+				throw new ArgumentNullException("xr");
+			
 			var stack = new Stack<string>();
 			var dt = new DataTable();
 			DataRow currentRow = null;
