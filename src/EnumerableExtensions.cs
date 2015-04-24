@@ -5,7 +5,7 @@ using System.Linq;
 namespace HallLibrary.Extensions
 {
 	/// <summary>
-	/// Contains static methods for working with <see cref="IEnumerable" />s.
+	/// Contains static methods for working with enumerables.
 	/// </summary>
 	public static class EnumerableExtensions
 	{
