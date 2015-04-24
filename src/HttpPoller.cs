@@ -4,8 +4,14 @@ using System.Reactive.Linq;
 
 namespace HallLibrary.Extensions
 {
+	/// <summary>
+	/// Contains static methods useful for polling a REST/HTTP server's resources.
+	/// </summary>
 	public static class HttpPoller
 	{
+		/// <summary>
+		/// Contains the response headers and plain text content from a web request.
+		/// </summary>
 		public struct ResponseDetails
 		{
 			public WebHeaderCollection Headers;
