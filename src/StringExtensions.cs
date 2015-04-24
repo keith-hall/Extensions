@@ -52,18 +52,17 @@ namespace HallLibrary.Extensions
 		/// <returns>Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> strings in the current <see cref="System.String" /> object.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="find" /> contains a <c>null</c> value.</exception>
 		/// <remarks>Note that the order in which the indexes are returned is not deterministic. See <see cref="AllSortedIndexesOf" />.</remarks>
-		public static IEnumerable<KeyValuePair<string, int>> AllIndexesOf(this string value, IEnumerable<string> find)
+		private static IEnumerable<KeyValuePair<string, int>> AllIndexesOf(this string value, IEnumerable<string> find)
 		{
 			var results = new ConcurrentBag<KeyValuePair<string, int>>();
 			Parallel.ForEach(find, search =>
 								   {
 									   var r = AllIndexesOf(value, search).Select(pos => new KeyValuePair<string, int>(search, pos));
-									   Parallel.ForEach(r, kvp => results.Add(kvp)); // unable to yield return from here, so add results concurrently
+									   foreach (var kvp in r) results.Add(kvp); // unable to yield return from here, so add results concurrently
 								   });
 			return results;
 		}
 		/* // alternative implementation that will keep the find indexes together
-		public static IEnumerable<KeyValuePair<string, int>> AllIndexesOf(this string value, IEnumerable<string> find)
 		{
 			var results = new ConcurrentBag<List<KeyValuePair<string, int>>>();
 			Parallel.ForEach(find, search => 
