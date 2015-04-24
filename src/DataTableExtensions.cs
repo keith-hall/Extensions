@@ -121,7 +121,7 @@ namespace HallLibrary.Extensions
 			Func<bool, string> toBoolString = b => b ? @"1" : @"0";
 	
 			if (value is DateTime)
-				return ((DateTime)value).ToISO8601String();
+				return ((DateTime)value).ToISO8601String(true, true);
 			if (value is bool)
 				return toBoolString((bool)value);
 			if (value is System.Byte[])
