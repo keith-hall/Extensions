@@ -185,12 +185,11 @@ namespace HallLibrary.Extensions
 				throw new ArgumentNullException("row");
 			if (xr == null)
 				throw new ArgumentNullException("xr");
-			
+
 			var stack = new Stack<string>();
 			var dt = new DataTable();
-			DataRow currentRow = null;
-	
-			Action<string> process = (name) =>
+
+			Action<string, DataRow> process = (name, relatedRow) =>
 			{
 				if (xr.HasValue && !string.IsNullOrWhiteSpace(xr.Value))
 				{
@@ -200,12 +199,13 @@ namespace HallLibrary.Extensions
 					var col = string.Join("/", level);
 					if (!dt.Columns.Contains(col))
 						dt.Columns.Add(col);
-	
-					if (currentRow != null)
-						currentRow.SetField(col, xr.Value);
+
+					if (relatedRow != null)
+						relatedRow.SetField(col, xr.Value);
 				}
 			};
-	
+
+			DataRow currentRow = null;
 			while (xr.Read())
 			{
 				if (xr.NodeType != XmlNodeType.Comment)
@@ -214,7 +214,7 @@ namespace HallLibrary.Extensions
 					{
 						if (String.IsNullOrEmpty(dt.TableName))
 							dt.TableName = xr.Name;
-	
+
 						if (xr.Name == row)
 						{
 							currentRow = dt.NewRow();
@@ -228,13 +228,13 @@ namespace HallLibrary.Extensions
 						xr.MoveToFirstAttribute();
 						do
 						{
-							process("@" + xr.Name);
+							process("@" + xr.Name, currentRow);
 						} while (xr.MoveToNextAttribute());
 						xr.MoveToElement();
 					}
 					if (currentRow != null)
 					{
-						process(null);
+						process(null, currentRow);
 						if (xr.NodeType == XmlNodeType.EndElement || xr.IsEmptyElement)
 						{
 							if (xr.Name == row)
@@ -246,7 +246,7 @@ namespace HallLibrary.Extensions
 				}
 			}
 			xr.Close();
-	
+
 			if (shortNames)
 			{
 				var cols = dt.Columns.OfType<DataColumn>().Select(dc => new { Column = dc, FullName = dc.ColumnName, ShortName = dc.ColumnName.Split('/').First() }).GroupBy(c => c.ShortName).Where(g => g.Count() == 1).Select(g => g.First());
