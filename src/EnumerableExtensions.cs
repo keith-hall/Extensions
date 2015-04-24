@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace HallLibrary.Extensions
 {
+	/// <summary>
+	/// Contains static methods for working with <see cref="IEnumerable" />s.
+	/// </summary>
 	public static class EnumerableExtensions
 	{
 		/// <summary>
