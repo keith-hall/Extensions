@@ -19,6 +19,8 @@ namespace HallLibrary.Extensions
 		/// <param name="frequency">The frequency to poll at.</param>
 		/// <param name="createWebClient">An optional function to create a WebClient instance, for overriding timeouts, request headers etc.</param>
 		/// <returns>An observable containing the response headers and content of the specified url.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="url" /> or <paramref name="frequency" /> are <c>null</c>.</exception>
+		/// <exception cref="WebException">A problem occurs polling the specified <paramref name="url"/>.</exception>
 		public static IObservable<ResponseDetails> PollURL(string url, TimeSpan frequency, Func<WebClient> createWebClient = null)
 		{
 			createWebClient = createWebClient ?? (() => new WebClient());
