@@ -7,6 +7,9 @@ using System.Xml;
 
 namespace HallLibrary.Extensions
 {
+	/// <summary>
+	/// Contains static methods for working with, or converting to/from <see cref="DataTable" />s.
+	/// </summary>
 	public static class DataTableExtensions
 	{
 		#region CSV
