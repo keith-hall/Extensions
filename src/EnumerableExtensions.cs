@@ -51,7 +51,7 @@ namespace HallLibrary.Extensions
 		}
 
 		/// <summary>
-		/// Converts the current <see cref="T" /> <paramref name="value"/> to an enumerable, containing the <paramref name="value"/> as it's sole element.
+		/// Converts the current <paramref name="value"/> to an enumerable, containing the <paramref name="value"/> as it's sole element.
 		/// </summary>
 		/// <typeparam name="T">The type of the element.</typeparam>
 		/// <param name="value">The value that the new enumerable will contain.</param>
