@@ -3,6 +3,9 @@ using System.Globalization;
 
 namespace HallLibrary.Extensions
 {
+	/// <summary>
+	/// Contains extension methods for working with <see cref="DateTime" />s.
+	/// </summary>
 	public static class DateTimeExtensions
 	{
 		/// <summary>
