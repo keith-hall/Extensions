@@ -41,7 +41,7 @@ namespace Tests
 		[TestMethod]
 		public void TestCountOccurences()
 		{
-			Assert.AreEqual(@"hello world".CountOccurrences(Enumerable.Repeat(@"l", 1)), 3);
+			Assert.AreEqual(@"hello world".CountOccurrences(@"l"), 3);
 		}
 
 		[TestMethod]
