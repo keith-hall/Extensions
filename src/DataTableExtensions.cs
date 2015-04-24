@@ -119,7 +119,7 @@ namespace HallLibrary.Extensions
 				return @"null";
 	
 			Func<bool, string> toBoolString = b => b ? @"1" : @"0";
-			Func<bool, string> toDateString = d => d.ToISO8601String(false, false).Substring(0, @"yyyy-MM-ddTHH:mm:ss.fff".Length);
+			Func<DateTime, string> toDateString = d => d.ToISO8601String(false, false).Substring(0, @"yyyy-MM-ddTHH:mm:ss.fff".Length);
 	
 			if (value is DateTime)
 				return toDateString((DateTime)value);
