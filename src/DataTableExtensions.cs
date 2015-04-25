@@ -48,20 +48,26 @@ namespace HallLibrary.Extensions
 	
 		public static IEnumerable<System.Dynamic.ExpandoObject> FromCSVEnumerable(IEnumerable<IEnumerable<string>> csv)
 		{
-			var headers = csv.First().ToArray();
-	
-			foreach (var row in csv.Skip(1))
-			{
-				var obj = new System.Dynamic.ExpandoObject();
-				var ret = obj as IDictionary<string, object>;
-	
-				//x for (int i = 0; i < headers.Length; i++)
-				//x 	ret.Add(headers[i], row.ElementAt(i));
-				var zipped = headers.Zip(row, (header, value) => new KeyValuePair<string, object>(header, value));
-				foreach (var kvp in zipped)
-					ret.Add(kvp);
-	
-				yield return obj;
+			using (var iterator = csv.GetEnumerator()) {
+				if (! iterator.MoveNext())
+					throw new InvalidOperationException(@"No header row in enumerable");
+					
+				var headers = iterator.Current.ToArray();
+				
+				while (iterator.MoveNext())
+				{
+					var row = iterator.Current;
+					var obj = new System.Dynamic.ExpandoObject();
+					var ret = obj as IDictionary<string, object>;
+		
+					//x for (int i = 0; i < headers.Length; i++)
+					//x 	ret.Add(headers[i], row.ElementAt(i));
+					var zipped = headers.Zip(row, (header, value) => new KeyValuePair<string, object>(header, value));
+					foreach (var kvp in zipped)
+						ret.Add(kvp);
+		
+					yield return obj;
+				}
 			}
 		}
 		
@@ -122,7 +128,7 @@ namespace HallLibrary.Extensions
 				return @"null";
 	
 			Func<bool, string> toBoolString = b => b ? @"1" : @"0";
-			Func<DateTime, string> toDateString = d => d.ToISO8601String(false).Substring(0, @"yyyy-MM-ddTHH:mm:ss.fff".Length);
+			Func<DateTime, string> toDateString = d => d.ToSortableDateTime();
 	
 			if (value is DateTime)
 				return toDateString((DateTime)value);
