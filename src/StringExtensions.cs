@@ -51,7 +51,7 @@ namespace HallLibrary.Extensions
 		/// <param name="find">The strings to seek.</param>
 		/// <returns>Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> strings in the current <see cref="System.String" /> object.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="find" /> contains a <c>null</c> value.</exception>
-		/// <remarks>Searches through <paramref name="value" /> for each <paramref name="find" /> in parallel. Therefore, note that the order in which the indexes are returned is not deterministic. See <see cref="AllSortedIndexesOf" />.</remarks>
+		/// <remarks>Searches through <paramref name="value" /> for each <paramref name="find" /> in parallel, for increased performance. Therefore, note that the order in which the indexes are returned is not deterministic. See <see cref="AllSortedIndexesOf" />.</remarks>
 		private static IEnumerable<KeyValuePair<string, int>> AllIndexesOf(this string value, IEnumerable<string> find)
 		{
 			var results = new ConcurrentBag<KeyValuePair<string, int>>();
