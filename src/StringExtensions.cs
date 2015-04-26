@@ -81,7 +81,7 @@ namespace HallLibrary.Extensions
 		/// <param name="find">The strings to seek.</param>
 		/// <returns>Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> strings in the current <see cref="System.String" /> object, in the order in which they appear.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="find" /> contains a <c>null</c> value.</exception>
-		public static IEnumerable<KeyValuePair<string, int>> AllSortedIndexesOf(this string value, IEnumerable<string> find)
+		public static IOrderedEnumerable<KeyValuePair<string, int>> AllSortedIndexesOf(this string value, IEnumerable<string> find)
 		{
 			var indexes = AllIndexesOf(value, find);
 			return indexes.OrderBy(i => i.Value);
