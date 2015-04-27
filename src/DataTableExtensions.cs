@@ -113,9 +113,10 @@ namespace HallLibrary.Extensions
 	
 			if (createTable)
 			{
+				// TODO: more efficient way of doing this that doesn't involve calling GetValueForSQL again for each cell, plus to see if the inferred data types for all values in a column are the same, and to use it - i.e. DateTime
 				sql = (tableName.StartsWith("@") ? "DECLARE " : "CREATE TABLE ") + tableName + (tableName.StartsWith("@") ? " TABLE " : string.Empty) + " (" + string.Join(
 					", ",
-					dt.Columns.OfType<DataColumn>().Select(dc => "[" + dc.ColumnName + "] NVARCHAR(" + dt.Rows.OfType<DataRow>().Max(dr => dr[dc].ToString().Length).ToString() + ")")
+					dt.Columns.OfType<DataColumn>().Select(dc => "[" + dc.ColumnName + "] NVARCHAR(" + dt.Rows.OfType<DataRow>().Max(dr => GetValueForSQL(dr[dc], true).Length).ToString() + ")")
 					) + ")\r\n" + sql;
 			}
 	
