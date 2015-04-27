@@ -128,7 +128,7 @@ namespace HallLibrary.Extensions
 				return @"null";
 	
 			Func<bool, string> toBoolString = b => b ? @"1" : @"0";
-			Func<DateTime, string> toDateString = d => d.ToSortableDateTime();
+			Func<DateTime, string> toDateString = d => @"'" + d.ToSortableDateTime() + @"'";
 	
 			if (value is DateTime)
 				return toDateString((DateTime)value);
