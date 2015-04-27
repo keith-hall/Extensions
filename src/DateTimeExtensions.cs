@@ -30,8 +30,10 @@ namespace HallLibrary.Extensions
 		/// <param name="dt">The date to convert.</param>
 		/// <returns>A sortable formatted <see cref="String"/> representation of the specified <see cref="DateTime"/>.</returns>
 		public static string ToSortableDateTime (this DateTime dt) {
-			return Thread.CurrentThread.CurrentCulture.DateTimeFormat.UniversalSortableDateTimePattern
-			       .Replace(@"Z'", @".'fff");
+			return dt.ToString(
+				Thread.CurrentThread.CurrentCulture.DateTimeFormat.UniversalSortableDateTimePattern
+			        .Replace(@"Z'", @".'fff")
+			       );
 		}
 		
 		/// <summary>
