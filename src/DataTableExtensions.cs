@@ -25,8 +25,10 @@ namespace HallLibrary.Extensions
 			var dt = new DataTable(path);
 			foreach (var header in csv.First())
 				dt.Columns.Add(header);
+			dt.BeginLoadData();
 			foreach (var values in csv.Skip(1))
 				dt.Rows.Add(values);
+			dt.EndLoadData();
 			return dt;
 		}
 	
@@ -39,10 +41,10 @@ namespace HallLibrary.Extensions
 			var csvList = csv.ToList();
 			foreach (var k in (csvList.First() as IDictionary<string, object>).Select(e => e.Key))
 				result.Columns.Add(k.ToString());
-	
+			result.BeginLoadData();
 			foreach (var r in csvList)
 				result.Rows.Add((r as IDictionary<string, object>).Values.ToArray());
-	
+			result.EndLoadData();
 			return result;
 		}
 	
@@ -173,8 +175,10 @@ namespace HallLibrary.Extensions
 		public static DataTable Filter(this DataTable table, IEnumerable<DataRow> rows)
 		{
 			var filtered = table.Clone();
+			filtered.BeginLoadData();
 			foreach (var row in rows)
 				filtered.Rows.Add(row.ItemArray);
+			filtered.EndLoadData();
 			return filtered;
 		}
 		#endregion
