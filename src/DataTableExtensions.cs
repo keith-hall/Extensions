@@ -107,7 +107,7 @@ namespace HallLibrary.Extensions
 			var possibleSeparators = new [] { @",", @";", "\t", @"|" };
 			var results = possibleSeparators.Select(s => {
 				try {
-					return new { Separator = s, Contents = HallLibrary.Extensions.DataTableExtensions.OpenCSV(path, s).Take(maxLinesToExamine).Select(r => r.Length).Distinct().ToList() };
+					return new { Separator = s, Contents = OpenCSV(path, s).Take(maxLinesToExamine).Select(r => r.Length).Distinct().ToList() };
 				} catch (Microsoft.VisualBasic.FileIO.MalformedLineException) {
 					return new { Separator = s, Contents = (List<int>)null };
 				}
