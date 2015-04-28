@@ -98,8 +98,45 @@ namespace HallLibrary.Extensions
 				}
 			}
 		}
+		
+		public static string GetValueForCSV(object value, string separator, bool tryConvertFromString)
+		{
+			const string quote = "\"";
+			return GetValueBase(value, string.Empty, string.Empty, tryConvertFromString, s => {
+				s = s.Replace(Environment.NewLine, " ").Replace("\r", " ").Replace("\n", " "); // remove line breaks, replace with spaces
+				s = s.Replace(quote, @"\" + quote); // replace quotes with a backslash and then a quote
+				return s.IndexOf(separator, StringComparison.InvariantCultureIgnoreCase) > -1 ? (quote + s + quote) : s;
+			});
+		}
 		#endregion
-	
+		
+		internal static string GetValueBase(object value, string nullSubstitution, string byteArrayPrefix, bool tryConvertFromString, Func<string, string> escapeIfNecessary) {
+			if (value == null)
+				return nullSubstitution;
+			
+			if (tryConvertFromString && value is string)
+			{
+				string valAsString = (string)value;
+				DateTime valAsDate;
+				if (DateTime.TryParse(valAsString, out valAsDate))
+					value = valAsDate;
+				if (valAsString.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase) || valAsString.Equals(bool.TrueString, StringComparison.InvariantCultureIgnoreCase))
+					value = bool.Parse(valAsString);
+			}
+			
+			Func<bool, string> toBoolString = b => escapeIfNecessary(b ? @"1" : @"0");
+			Func<DateTime, string> toDateString = d => escapeIfNecessary(d.ToSortableDateTime());
+			
+			if (value is DateTime)
+				return toDateString((DateTime)value);
+			if (value is bool)
+				return toBoolString((bool)value);
+			if (value is System.Byte[])
+				return escapeIfNecessary(byteArrayPrefix ?? string.Empty + (new SoapHexBinary(value as System.Byte[]).ToString()));
+			
+			return escapeIfNecessary(value.ToString());
+		}
+		
 		#region SQL
 		public static string TableToSQLInsert(this DataTable dt, string tableName, bool createTable)
 		{
@@ -124,39 +161,16 @@ namespace HallLibrary.Extensions
 	
 			return sql;
 		}
-	
+		
 		public static string GetValueForSQL(object value, bool tryConvertFromString)
 		{
-			if (value == null)
-				return @"null";
-	
-			Func<bool, string> toBoolString = b => b ? @"1" : @"0";
-			Func<DateTime, string> toDateString = d => @"'" + d.ToSortableDateTime() + @"'";
-	
-			if (value is DateTime)
-				return toDateString((DateTime)value);
-			if (value is bool)
-				return toBoolString((bool)value);
-			if (value is System.Byte[])
-				return @"0x" + (new SoapHexBinary(value as System.Byte[]).ToString());
-	
-			var val = value.ToString();
-			if (value is int || value is float || value is double)
-				return val;
-	
-			if (tryConvertFromString)
-			{
-				DateTime valAsDate;
+			return GetValueBase(value, @"null", @"0x", tryConvertFromString, s => {
 				float valAsFloat;
-	
-				if (DateTime.TryParse(val, out valAsDate))
-					return toDateString(valAsDate);
-				if (val.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase) || val.Equals(bool.TrueString, StringComparison.InvariantCultureIgnoreCase))
-					return toBoolString(bool.Parse(val));
-				if (val.Length < 7 && float.TryParse(val, out valAsFloat)) // check if it is a number stored in a string value
-					return val;
-			}
-			return @"'" + val.Replace(@"'", @"''") + @"'"; // escape the value
+				if (float.TryParse(s, out valAsFloat)) // check if it is a valid number
+					return s;
+				else
+					return @"'" + s.Replace(@"'", @"''") + @"'"; // escape the value
+			});
 		}
 		#endregion
 	
