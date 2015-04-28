@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Xml;
+using System.IO;
 
 namespace HallLibrary.Extensions
 {
