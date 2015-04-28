@@ -19,6 +19,7 @@ namespace HallLibrary.Extensions
 		/// </summary>
 		/// <param name="path">The path to the CSV file.</param>
 		/// <param name="separator">The field separator used in the CSV file.</param>
+		/// <param name="containsHeaders">Specifies whether the CSV file contains a header row or not, which will be used to set the DataTable column headings.</param>
 		/// <returns>A <see cref="System.Data.DataTable"/> representing the contents of the CSV file.</returns>
 		public static DataTable CSVToDataTable(string path, string separator = null, bool containsHeaders = true)
 		{
@@ -78,12 +79,13 @@ namespace HallLibrary.Extensions
 		/// Open a CSV file at the specified <paramref name="path"/> using the specified field <paramref name="separator"/>.
 		/// </summary>
 		/// <param name="path">The path to the CSV file.</param>
-		/// <param name="separator">The field separator to use.</param>
+		/// <param name="separator">The field separator to use.  If <c>null</b>, it will attempt to determine the field separator automatically.</param>
 		/// <returns>An enumerable containing a <see cref="System.String"/> array all the fields in each row.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="path"/> or <paramref name="separator"/> is null or empty.</exception>
+		/// <exception cref="ArgumentNullException"><paramref name="path"/> is null or empty.</exception>
+		/// <exception cref="InvalidDataException">When <paramref name="separator"/> is <c>null</c> and it is unable to automatically determine the field separator.</exception>
 		public static IEnumerable<string[]> OpenCSV(string path, string separator = null)
 		{ //http://msdn.microsoft.com/en-us/library/microsoft.visualbasic.fileio.textfieldparser.aspx
-			if (separator == null)
+			if (string.IsNullOrEmpty(separator))
 				separator = DetermineCSVSeparator(path);
 			using (var tfp = new Microsoft.VisualBasic.FileIO.TextFieldParser(path))
 			{
