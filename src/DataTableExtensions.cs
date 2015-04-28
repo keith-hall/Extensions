@@ -20,7 +20,7 @@ namespace HallLibrary.Extensions
 		/// <param name="path">The path to the CSV file.</param>
 		/// <param name="separator">The field separator used in the CSV file.</param>
 		/// <returns>A <see cref="System.Data.DataTable"/> representing the contents of the CSV file.</returns>
-		public static DataTable CSVToDataTable(string path, string separator)
+		public static DataTable CSVToDataTable(string path, string separator = null)
 		{
 			var csv = OpenCSV(path, separator).ToList();
 			var dt = new DataTable(path);
@@ -81,7 +81,7 @@ namespace HallLibrary.Extensions
 		/// <param name="separator">The field separator to use.</param>
 		/// <returns>An enumerable containing a <see cref="System.String"/> array all the fields in each row.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="path"/> or <paramref name="separator"/> is null or empty.</exception>
-		public static IEnumerable<string[]> OpenCSV(string path, string separator)
+		public static IEnumerable<string[]> OpenCSV(string path, string separator = null)
 		{ //http://msdn.microsoft.com/en-us/library/microsoft.visualbasic.fileio.textfieldparser.aspx
 			if (separator == null)
 				separator = DetermineCSVSeparator(path);
