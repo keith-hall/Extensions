@@ -104,10 +104,9 @@ namespace HallLibrary.Extensions
 		public static string DetermineCSVSeparator (string path) {
 			const int maxLinesToExamine = 3;
 			var possibleSeparators = new [] { @",", @";", "\t", @"|" };
-			var results = possibleSeparators.Select(s => new { Separator = s, Contents = OpenCSV(path, s).Take(maxLinesToExamine).ToList() });
-			results = results.Where(r => r.Contents.All(c => c.Length == r.Contents.First().Length)).OrderByDescending(r => r.Contents.First().Length);
-			var bestMatch = results.SingleOrDefault(r => r.Contents.First().Length != 1);
-			if (bestMatch == null)
+			var results = possibleSeparators.Select(s => new { Separator = s, Contents = OpenCSV(path, s).Take(maxLinesToExamine).Select(r => r.Length).Distinct().ToList() });
+			var bestMatch = results.SingleOrDefault(r => !r.Contents.CountExceeds(1) && r.Contents.Single() > 1); // if there are multiple distinct values then it can't be the correct field separator, and if it only returns one field then it is also incorrect
+			if (bestMatch == null) // if there are 0 or more than 1 result, we cannot be sure what the correct field separator is
 				throw new InvalidDataException(@"Unable to determine separator for file: " + path);
 			
 			return bestMatch.Separator;
