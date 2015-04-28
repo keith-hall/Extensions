@@ -143,7 +143,7 @@ namespace HallLibrary.Extensions
 		
 		internal static string GetValueBase(object value, string nullSubstitution, string byteArrayPrefix, bool tryConvertFromString, Func<string, string> escapeIfNecessary) {
 			if (value == null)
-				return nullSubstitution;
+				return nullSubstitution; // the null substitution never needs escaping
 			
 			if (tryConvertFromString && value is string)
 			{
@@ -163,7 +163,7 @@ namespace HallLibrary.Extensions
 			if (value is bool)
 				return toBoolString((bool)value);
 			if (value is System.Byte[])
-				return escapeIfNecessary(byteArrayPrefix ?? string.Empty + (new SoapHexBinary(value as System.Byte[]).ToString()));
+				return escapeIfNecessary((byteArrayPrefix ?? string.Empty) + (new SoapHexBinary(value as System.Byte[]).ToString()));
 			
 			return escapeIfNecessary(value.ToString());
 		}
