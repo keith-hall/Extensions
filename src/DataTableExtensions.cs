@@ -82,6 +82,8 @@ namespace HallLibrary.Extensions
 		/// <exception cref="ArgumentNullException"><paramref name="path"/> or <paramref name="separator"/> is null or empty.</exception>
 		public static IEnumerable<string[]> OpenCSV(string path, string separator)
 		{ //http://msdn.microsoft.com/en-us/library/microsoft.visualbasic.fileio.textfieldparser.aspx
+			if (separator == null)
+				separator = DetermineCSVSeparator(path);
 			using (var tfp = new Microsoft.VisualBasic.FileIO.TextFieldParser(path))
 			{
 				try
@@ -97,6 +99,18 @@ namespace HallLibrary.Extensions
 					tfp.Close();
 				}
 			}
+		}
+		
+		public static string DetermineCSVSeparator (string path) {
+			const int maxLinesToExamine = 3;
+			var possibleSeparators = new [] { @",", @";", "\t", @"|" };
+			var results = possibleSeparators.Select(s => new { Separator = s, Contents = OpenCSV(path, s).Take(maxLinesToExamine).ToList() });
+			results = results.Where(r => r.Contents.All(c => c.Length == r.Contents.First().Length)).OrderByDescending(r => r.Contents.First().Length);
+			var bestMatch = results.SingleOrDefault(r => r.Contents.First().Length != 1);
+			if (bestMatch == null)
+				throw new InvalidDataException(@"Unable to determine separator for file: " + path);
+			
+			return bestMatch.Separator;
 		}
 		
 		public static string ConvertToCSV(this DataTable table, string separator = "\t")
