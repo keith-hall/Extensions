@@ -20,14 +20,14 @@ namespace HallLibrary.Extensions
 		/// <param name="path">The path to the CSV file.</param>
 		/// <param name="separator">The field separator used in the CSV file.</param>
 		/// <returns>A <see cref="System.Data.DataTable"/> representing the contents of the CSV file.</returns>
-		public static DataTable CSVToDataTable(string path, string separator = null)
+		public static DataTable CSVToDataTable(string path, string separator = null, bool containsHeaders = true)
 		{
 			var csv = OpenCSV(path, separator).ToList();
 			var dt = new DataTable(path);
 			foreach (var header in csv.First())
-				dt.Columns.Add(header);
+				dt.Columns.Add(containsHeaders ? header : string.Empty);
 			dt.BeginLoadData();
-			foreach (var values in csv.Skip(1))
+			foreach (var values in (containsHeaders ? csv.Skip(1) : csv))
 				dt.Rows.Add(values);
 			dt.EndLoadData();
 			return dt;
