@@ -99,6 +99,17 @@ namespace HallLibrary.Extensions
 			}
 		}
 		
+		public static string ConvertToCSV(this DataTable table, string separator = "\t")
+		{
+			var headerFields = string.Join(separator, table.Columns.OfType<DataColumn>().Select(c => c.Caption)) + Environment.NewLine;
+	
+			return headerFields + string.Join(Environment.NewLine,
+				table.Rows.OfType<DataRow>().Select(row => string.Join(separator,
+					table.Columns.OfType<DataColumn>().Select(c =>
+						GetValueForCSV(row[c], separator, true)
+					))));
+		}
+		
 		public static string GetValueForCSV(object value, string separator, bool tryConvertFromString)
 		{
 			const string quote = "\"";
