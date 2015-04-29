@@ -123,15 +123,20 @@ namespace HallLibrary.Extensions
 			return bestMatch.Separator;
 		}
 		
-		public static string ConvertToCSV(this DataTable table, string separator = "\t")
+		public static void ConvertToCSV(this DataTable table, TextWriter writer, string separator = "\t")
 		{
-			var headerFields = string.Join(separator, table.Columns.OfType<DataColumn>().Select(c => c.Caption)) + Environment.NewLine;
-	
-			return headerFields + string.Join(Environment.NewLine,
-				table.Rows.OfType<DataRow>().Select(row => string.Join(separator,
-					table.Columns.OfType<DataColumn>().Select(c =>
-						GetValueForCSV(row[c], separator, true)
-					))));
+			var lines = table.Rows.OfType<DataRow>().Select(row => string.Join(separator,
+				table.Columns.OfType<DataColumn>().Select(c =>
+					GetValueForCSV(row[c], separator, true)
+				)));
+			
+			writer.WriteLine(string.Join(separator,
+				table.Columns.OfType<DataColumn>().Select(c => c.Caption)));
+			
+			foreach (var line in lines)
+				writer.WriteLine(line);
+			
+			writer.Flush();
 		}
 		
 		public static string GetValueForCSV(object value, string separator, bool tryConvertFromString)
