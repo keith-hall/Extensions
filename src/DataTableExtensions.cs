@@ -206,7 +206,7 @@ namespace HallLibrary.Extensions
 		{
 			return GetValueBase(value, @"null", @"0x", tryConvertFromString, s => {
 				float valAsFloat;
-				if (float.TryParse(s, out valAsFloat)) // check if it is a valid number
+				if (!s.StartsWith(@"0") && float.TryParse(s, out valAsFloat)) // check if it is a valid number
 					return s;
 				else
 					return @"'" + s.Replace(@"'", @"''") + @"'"; // escape the value
