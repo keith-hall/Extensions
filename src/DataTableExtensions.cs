@@ -108,11 +108,13 @@ namespace HallLibrary.Extensions
 			const int maxLinesToExamine = 3;
 			var possibleSeparators = new [] { @",", @";", "\t", @"|" };
 			var results = possibleSeparators.Select(s => {
+				List<int> c = null;
 				try {
-					return new { Separator = s, Contents = OpenCSV(path, s).Take(maxLinesToExamine).Select(r => r.Length).Distinct().ToList() };
+					c = OpenCSV(path, s).Take(maxLinesToExamine).Select(r => r.Length).Distinct().ToList();
 				} catch (Microsoft.VisualBasic.FileIO.MalformedLineException) {
-					return new { Separator = s, Contents = (List<int>)null };
+					
 				}
+				return new { Separator = s, Contents = c };
 			}).Where(r => r.Contents != null);
 			var bestMatch = results.SingleOrDefault(r => !r.Contents.CountExceeds(1) && r.Contents.Single() > 1); // if there are multiple distinct values then it can't be the correct field separator, and if it only returns one field then it is also incorrect
 			if (bestMatch == null) // if there are 0 or more than 1 result, we cannot be sure what the correct field separator is
