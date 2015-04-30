@@ -97,7 +97,7 @@ namespace HallLibrary.Extensions
 		/// Open a CSV file at the specified <paramref name="path"/> using the specified field <paramref name="separator"/>.
 		/// </summary>
 		/// <param name="path">The path to the CSV file.</param>
-		/// <param name="separator">The field separator to use.  If <c>null</b>, it will attempt to determine the field separator automatically.</param>
+		/// <param name="separator">The field separator to use.  If <c>null</c>, it will attempt to determine the field separator automatically.</param>
 		/// <returns>An enumerable containing a <see cref="System.String"/> array all the fields in each row.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="path"/> is null or empty.</exception>
 		/// <exception cref="InvalidDataException">When <paramref name="separator"/> is <c>null</c> and it is unable to automatically determine the field separator.</exception>
@@ -122,6 +122,13 @@ namespace HallLibrary.Extensions
 			}
 		}
 		
+		/// <summary>
+		/// Open the specified CSV file and parse a few rows to determine what field separator is used.
+		/// </summary>
+		/// <param name="path">The path to the CSV file.</param>
+		/// <returns>The field separator used in the specified CSV file.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="path"/> is null or empty.</exception>
+		/// <exception cref="InvalidDataException">When it is unable to automatically determine the field separator.</exception>
 		public static string DetermineCSVSeparator (string path) {
 			const int maxLinesToExamine = 3;
 			var possibleSeparators = new [] { @",", @";", "\t", @"|" };
