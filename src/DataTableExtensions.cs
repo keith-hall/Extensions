@@ -24,13 +24,25 @@ namespace HallLibrary.Extensions
 		/// <returns>A <see cref="System.Data.DataTable"/> representing the contents of the CSV file.</returns>
 		public static DataTable CSVToDataTable(string path, string separator = null, bool containsHeaders = true, bool inferTypes = false)
 		{
-			var csv = OpenCSV(path, separator).ToList();
+			var csv = OpenCSV(path, separator);
 			var dt = new DataTable(path);
-			foreach (var header in csv.First())
+			
+			var iterator = csv.GetEnumerator();
+			if (! iterator.MoveNext())
+				return dt;
+			
+			foreach (var header in iterator.Current)
 				dt.Columns.Add(containsHeaders ? header : string.Empty);
+			
+			if (containsHeaders && !iterator.MoveNext())
+				return dt;
+			
 			dt.BeginLoadData();
-			foreach (var values in (containsHeaders ? csv.Skip(1) : csv))
-				dt.Rows.Add(values);
+			
+			do {
+				dt.Rows.Add(iterator.Current);
+			} while (iterator.MoveNext());
+			
 			dt.EndLoadData();
 			
 			if (inferTypes) {
