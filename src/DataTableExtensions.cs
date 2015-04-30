@@ -20,8 +20,9 @@ namespace HallLibrary.Extensions
 		/// <param name="path">The path to the CSV file.</param>
 		/// <param name="separator">The field separator used in the CSV file.</param>
 		/// <param name="containsHeaders">Specifies whether the CSV file contains a header row or not, which will be used to set the DataTable column headings.</param>
+		/// <param name="inferTypes">Specifies whether to attempt to determine the type of each column based on it's contents.  Supports dates and numbers.</param>
 		/// <returns>A <see cref="System.Data.DataTable"/> representing the contents of the CSV file.</returns>
-		public static DataTable CSVToDataTable(string path, string separator = null, bool containsHeaders = true)
+		public static DataTable CSVToDataTable(string path, string separator = null, bool containsHeaders = true, bool inferTypes = false)
 		{
 			var csv = OpenCSV(path, separator).ToList();
 			var dt = new DataTable(path);
@@ -31,6 +32,11 @@ namespace HallLibrary.Extensions
 			foreach (var values in (containsHeaders ? csv.Skip(1) : csv))
 				dt.Rows.Add(values);
 			dt.EndLoadData();
+			
+			if (inferTypes) {
+				for (var col = 0; col < dt.Columns.Count; col ++)
+					dt.Columns[col].ConvertFromString();
+			}
 			return dt;
 		}
 	
@@ -126,9 +132,10 @@ namespace HallLibrary.Extensions
 		public static void ConvertToCSV(this DataTable table, TextWriter writer, string separator = "\t")
 		{
 			var lines = table.Rows.OfType<DataRow>().Select(row => string.Join(separator,
-				table.Columns.OfType<DataColumn>().Select(c =>
-					GetValueForCSV(row[c], separator, true)
-				)));
+				table.Columns.OfType<DataColumn>().Select(col =>
+					GetValueForCSV(row[col], separator)
+				)
+			));
 			
 			writer.WriteLine(string.Join(separator,
 				table.Columns.OfType<DataColumn>().Select(c => c.Caption)));
@@ -139,10 +146,10 @@ namespace HallLibrary.Extensions
 			writer.Flush();
 		}
 		
-		public static string GetValueForCSV(object value, string separator, bool tryConvertFromString)
+		public static string GetValueForCSV(object value, string separator)
 		{
 			const string quote = "\"";
-			return GetValueBase(value, string.Empty, string.Empty, tryConvertFromString, s => {
+			return GetValueBase(value, string.Empty, string.Empty, s => {
 				s = s.Replace(Environment.NewLine, " ").Replace("\r", " ").Replace("\n", " "); // remove line breaks, replace with spaces
 				s = s.Replace(quote, @"\" + quote); // replace quotes with a backslash and then a quote
 				return s.IndexOf(separator, StringComparison.InvariantCultureIgnoreCase) > -1 ? (quote + s + quote) : s;
@@ -150,19 +157,59 @@ namespace HallLibrary.Extensions
 		}
 		#endregion
 		
-		internal static string GetValueBase(object value, string nullSubstitution, string byteArrayPrefix, bool tryConvertFromString, Func<string, string> escapeIfNecessary) {
-			if (value == null)
-				return nullSubstitution; // the null substitution never needs escaping
+		internal static object ConvertValueFromString(string value) {
+			decimal valAsDecimal;
+			if (!(value.StartsWith(@"0") && value.Length > 1) // ignore it if it starts with 0
+				&& decimal.TryParse(value, out valAsDecimal)) // check if it is a valid number, use decimal as it keeps the formatting / precision
+				return valAsDecimal;
+			DateTime valAsDate;
+			if (DateTime.TryParse(value, out valAsDate))
+				return valAsDate;
+			if (value.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase) || value.Equals(bool.TrueString, StringComparison.InvariantCultureIgnoreCase))
+				return bool.Parse(value);
+			return value;
+		}
+		
+		// infer the data type if same for all values in a column
+		public static void ConvertFromString (this DataColumn column) {
+			if (! column.DataType.Equals(typeof(string)))
+				throw new ArgumentException("Column DataType is not String", "column");
 			
-			if (tryConvertFromString && value is string)
-			{
-				string valAsString = (string)value;
-				DateTime valAsDate;
-				if (DateTime.TryParse(valAsString, out valAsDate))
-					value = valAsDate;
-				if (valAsString.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase) || valAsString.Equals(bool.TrueString, StringComparison.InvariantCultureIgnoreCase))
-					value = bool.Parse(valAsString);
+			var rows = column.Table.Rows.OfType<DataRow>().Select(row => ConvertValueFromString((string)row[column]));
+			var items = new List<object>(column.Table.Rows.Count);
+			foreach (var row in rows) {
+				if (items.Any() && !row.GetType().Equals(items.First().GetType())) { // data type of all items don't match
+					items = null;
+					break;
+				}
+				items.Add(row);
 			}
+			if (items != null && items.Any()) {
+				var ordinal = column.Ordinal;
+				var table = column.Table;
+				table.BeginLoadData();
+				
+				var newType = items.First().GetType();
+				if (newType.Equals(typeof(decimal)))
+					if (! items.Any(value => (decimal)value > int.MaxValue || value.ToString().Contains(@".")))
+						newType = typeof(int);
+				
+				var newColumn = new DataColumn(column.ColumnName, newType);
+				table.Columns.Remove(column);
+				
+				table.Columns.Add(newColumn);
+				newColumn.SetOrdinal(ordinal);
+				
+				foreach (var row in table.Rows.OfType<DataRow>().Zip(items, (dr, newValue) => Tuple.Create(dr, newValue)))
+					row.Item1[newColumn] = row.Item2;
+				
+				table.EndLoadData();
+			}
+		}
+		
+		internal static string GetValueBase(object value, string nullSubstitution, string byteArrayPrefix, Func<string, string> escapeIfNecessary) {
+			if (value == null)
+				return nullSubstitution;
 			
 			Func<bool, string> toBoolString = b => escapeIfNecessary(b ? @"1" : @"0");
 			Func<DateTime, string> toDateString = d => escapeIfNecessary(d.ToSortableDateTime());
@@ -171,42 +218,91 @@ namespace HallLibrary.Extensions
 				return toDateString((DateTime)value);
 			if (value is bool)
 				return toBoolString((bool)value);
-			if (value is System.Byte[])
-				return escapeIfNecessary((byteArrayPrefix ?? string.Empty) + (new SoapHexBinary(value as System.Byte[]).ToString()));
+			if (value is Byte[])
+				return escapeIfNecessary(byteArrayPrefix ?? string.Empty + (new SoapHexBinary(value as Byte[]).ToString()));
+			if (value is string)
+				return escapeIfNecessary((string)value);
 			
 			return escapeIfNecessary(value.ToString());
 		}
 		
 		#region SQL
-		public static string TableToSQLInsert(this DataTable dt, string tableName, bool createTable)
+		public static void TableToSQLInsert(this DataTable dt, string tableName, bool createTable, TextWriter writer)
 		{
-			var sql = "insert into " + tableName + " (" +
-				string.Join(", ", dt.Columns.OfType<DataColumn>().Select(
-					col => "[" + col.ColumnName + "]"
-				)) + ") values\r\n";
-			sql += " (" + string.Join(")\r\n,(", dt.Rows.OfType<DataRow>().Select(
-				row => string.Join(", ", dt.Columns.OfType<DataColumn>().Select(
-					col => GetValueForSQL(row[col], true)
-				)))
-			) + ")";
-	
 			if (createTable)
 			{
-				// TODO: more efficient way of doing this that doesn't involve calling GetValueForSQL again for each cell, plus to see if the inferred data types for all values in a column are the same, and to use it - i.e. DateTime
-				sql = (tableName.StartsWith("@") ? "DECLARE " : "CREATE TABLE ") + tableName + (tableName.StartsWith("@") ? " TABLE " : string.Empty) + " (" + string.Join(
-					", ",
-					dt.Columns.OfType<DataColumn>().Select(dc => "[" + dc.ColumnName + "] NVARCHAR(" + dt.Rows.OfType<DataRow>().Max(dr => GetValueForSQL(dr[dc], true).Length).ToString() + ")")
-					) + ")\r\n" + sql;
+				Func<DataColumn, string> ColumnDataTypeToSQL = col => {
+					var underlyingType = Nullable.GetUnderlyingType(col.DataType);
+					var rows = col.Table.Rows.OfType<DataRow>();
+					var nullable = (underlyingType != null) || col.AllowDBNull || rows.Any(row => row[col] == null);
+					
+					Func<Func<object, int>, string> getMaxLength = getLength => {
+						var max = 1;
+						if (rows.Any())
+							max = Math.Max(max, rows.Where(dr => dr[col] != null).Max(dr => getLength(dr[col])));
+						return @"(" + max.ToString() + @")";
+					};
+					
+					string sql;
+					sql = ((underlyingType ?? col.DataType).Name.ToLowerInvariant());
+					switch (sql) {
+						case "byte[]":
+							sql = @"varbinary" + getMaxLength(obj => ((byte[])obj).Length);
+							break;
+						case "guid":
+							sql = @"uniqueidentifier";
+							break;
+						case "int32":
+							sql = @"int";
+							break;
+						case "int64":
+							sql = @"bigint";
+							break;
+						case "boolean":
+							sql = @"bit";
+							break;
+						case "string":
+							sql = @"nvarchar" + getMaxLength(obj => ((string)obj).Length);
+							break;
+					}
+					sql += ((nullable) ? string.Empty : @" not") + @" null";
+					return sql;
+				};
+				const string tableVariableChar = @"@";
+				writer.WriteLine((tableName.StartsWith(tableVariableChar) ? @"DECLARE " : @"CREATE TABLE ") + tableName + (tableName.StartsWith(tableVariableChar) ? @" TABLE " : string.Empty) + @" (" +
+					string.Join(
+						@", ",
+						dt.Columns.OfType<DataColumn>().Select(col => @"[" + col.ColumnName + @"] " + ColumnDataTypeToSQL(col))
+					) + @")"
+				);
 			}
-	
-			return sql;
+			
+			writer.WriteLine(@"insert into " + tableName + @" (" +
+				string.Join(@", ", dt.Columns.OfType<DataColumn>().Select(
+					col => @"[" + col.ColumnName + @"]"
+				)) + @") values");
+			
+			var lines = dt.Rows.OfType<DataRow>().Select(
+				row => @"(" + string.Join(@", ", dt.Columns.OfType<DataColumn>().Select(
+					col => GetValueForSQL(row[col])
+				)) + @")");
+			
+			bool first = true;
+			foreach (var line in lines) {
+				if (first) {
+					first = false;
+					writer.Write(@" ");
+				} else
+					writer.Write(@",");
+				writer.WriteLine(line);
+			}
+			writer.Flush();
 		}
 		
-		public static string GetValueForSQL(object value, bool tryConvertFromString)
+		public static string GetValueForSQL(object value)
 		{
-			return GetValueBase(value, @"null", @"0x", tryConvertFromString, s => {
-				float valAsFloat;
-				if (!s.StartsWith(@"0") && float.TryParse(s, out valAsFloat)) // check if it is a valid number
+			return GetValueBase(value, @"null", @"0x", s => {
+				if (value is decimal || value is int || value is long || value is float) // if it is a numeric type, no need to escape it
 					return s;
 				else
 					return @"'" + s.Replace(@"'", @"''") + @"'"; // escape the value
