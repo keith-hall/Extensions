@@ -197,20 +197,20 @@ namespace HallLibrary.Extensions
 			var rows = column.Table.Rows.OfType<DataRow>().Select(row => ConvertValueFromString((string)row[column]));
 			var items = new List<object>(column.Table.Rows.Count);
 			foreach (var row in rows) {
-				if (items.Any() && !row.GetType().Equals(items.First().GetType())) { // data type of all items don't match
+				if (row != null && items.Any() && !row.GetType().Equals(items.First().GetType())) { // data type of all items don't match
 					items = null;
 					break;
 				}
 				items.Add(row);
 			}
-			if (items != null && items.Any()) {
+			if (items != null && items.Any(item => item != null)) {
 				var ordinal = column.Ordinal;
 				var table = column.Table;
 				table.BeginLoadData();
 				
-				var newType = items.First().GetType();
+				var newType = items.First(item => item != null).GetType();
 				if (newType.Equals(typeof(decimal)))
-					if (! items.Any(value => (decimal)value > int.MaxValue || value.ToString().Contains(@".")))
+					if (! items.Any(value => value != null && ((decimal)value > int.MaxValue || value.ToString().Contains(@"."))))
 						newType = typeof(int);
 				
 				var newColumn = new DataColumn(column.ColumnName, newType);
