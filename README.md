@@ -2,7 +2,7 @@
 Useful static or extension methods for working in C# or LINQPad
 
 ## DataTable extensions
-In some situations, it can be useful to view an XML file as a table, for example when a webservice returns an array of objects.
+In some situations, it can be useful to view an XML file as a table, for example when a webservice returns an array of objects.  While there is a built in function in dot net to read an xml file into a DataSet, it consists of multiple tables with relations, which isn't so easily viewable.
 For example, the following XML:
 ```xml
 <root>
@@ -36,5 +36,9 @@ User@id | FirstName | LastName | UserName | Address.BuildingNumber | Address.Str
 1 | Fred | Bloggs | bloggsf | 12 | The Street | Exampletown | null
 3 | Joe | Bloggs | bloggsj | 9 | Somewhere Else | Exampletown | TY12 6UA
 
+using the following code:
+```cs
+DataTableExtensions.ReadXML(XmlReader.Create(@"\\path\to\file.xml"), @"User", false, true);
+```
 
 [![MyGet Build Status](https://www.myget.org/BuildSource/Badge/progamer-me?identifier=4653f437-eca9-4422-9a81-662bceb36acc)](https://www.myget.org/)
