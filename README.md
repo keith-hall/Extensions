@@ -41,4 +41,7 @@ using the following code:
 DataTableExtensions.ReadXML(XmlReader.Create(@"\\path\to\file.xml"), @"User", false, true);
 ```
 
+## String Extensions
+Have you ever noticed that most of the time when doing a String.IndexOf, you almost always want to do some text manipulation.  Maybe you want the text that occurs before the string you are searching for, maybe the text before it, or maybe even the text between another IndexOf.  This is what StringExtensions helps you achieve with TextBefore, TextAfter and TextBetween.  Also, it can be useful to know the number of times a substring appears in a string, for this you can use CountOccurrences.  In addition, you can get all indexes of a substring in a string with AllIndexesOf and you can get all occurrences of text between two strings with AllTextBetween.
+
 [![MyGet Build Status](https://www.myget.org/BuildSource/Badge/progamer-me?identifier=4653f437-eca9-4422-9a81-662bceb36acc)](https://www.myget.org/)
