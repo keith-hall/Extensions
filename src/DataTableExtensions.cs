@@ -50,7 +50,7 @@ namespace HallLibrary.Extensions
 				// x	dt.Columns[col].ConvertFromString();
 				Parallel.ForEach(dt.Columns.OfType<DataColumn>().ToList(), col => {
 					try {
-						dt.Columns[col.ColumnName].ConvertFromString();
+						dt.Columns[col.ColumnName].ConvertFromString(false);
 					} catch (InvalidOperationException) {
 					}
 				});
@@ -196,28 +196,31 @@ namespace HallLibrary.Extensions
 		}
 		
 		// infer the data type if same for all values in a column
-		public static void ConvertFromString (this DataColumn column) {
+		public static void ConvertFromString (this DataColumn column, bool toMixed) {
 			if (! column.DataType.Equals(typeof(string)))
 				throw new ArgumentException("Column DataType is not String", "column");
 			
 			var rows = column.Table.Rows.OfType<DataRow>().Select(row => ConvertValueFromString((string)row[column]));
 			var items = new List<object>(column.Table.Rows.Count);
-			object firstNonNull = null;
+			Type newType = null;
 			foreach (var row in rows) {
-				if (row != null) {
-					firstNonNull = firstNonNull ?? row;
-					if (items.Any() && !row.GetType().Equals(firstNonNull.GetType())) // data type of all items don't match
-						throw new InvalidOperationException("Not all items are of the same type when converted from a string");
+				if (row != null && newType != typeof(object)) {
+					newType = newType ?? row.GetType();
+					if (!row.GetType().Equals(newType)) { // data type of all items don't match
+						if (toMixed)
+							newType = typeof(object);
+						else
+							throw new InvalidOperationException("Not all items are of the same type when converted from a string");
+					}
 				}
 				items.Add(row);
 			}
-			if (firstNonNull != null) {
+			if (newType != null) {
 				lock (column.Table) {
 					var ordinal = column.Ordinal;
 					var table = column.Table;
 					table.BeginLoadData();
 					
-					var newType = firstNonNull.GetType();
 					if (newType.Equals(typeof(decimal)))
 						if (! items.Any(value => value != null && ((decimal)value > int.MaxValue || value.ToString().Contains(@"."))))
 							newType = typeof(int);
@@ -331,7 +334,7 @@ namespace HallLibrary.Extensions
 		public static string GetValueForSQL(object value)
 		{
 			return GetValueBase(value, @"null", @"0x", s => {
-				if (value is decimal || value is int || value is long || value is float) // if it is a numeric type, no need to escape it
+				if (value is decimal || value is int || value is long || value is float || value is bool) // if it is a numeric type, no need to escape it
 					return s;
 				else
 					return @"'" + s.Replace(@"'", @"''") + @"'"; // escape the value
