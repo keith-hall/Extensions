@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Xml;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace HallLibrary.Extensions
 {
