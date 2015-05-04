@@ -64,5 +64,15 @@ namespace HallLibrary.Extensions
 			//x return Enumerable.Repeat(value, 1);
 			return new[] { value };
 		}
+		
+		/// <summary>
+		/// Concatenates a sequence with a single value of the same type.
+		/// </summary>
+		/// <param name="first">The first sequence to concatenate.</param>
+		/// <param name="second">The value to concatenate to the end of the <paramref name="first" /> sequence.</param>
+		/// <returns>The <paramref name="first" /> sequence concatenated with <paramref name="second" />.</returns>
+		public static IEnumerable<T> Concat<T> (this IEnumerable<T> first, T second) {
+			return first.Concat(second.AsSingleEnumerable());
+		}
 	}
 }
