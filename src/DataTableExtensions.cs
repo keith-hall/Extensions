@@ -130,9 +130,11 @@ namespace HallLibrary.Extensions
 		/// <exception cref="ArgumentNullException"><paramref name="path"/> is null or empty.</exception>
 		/// <exception cref="InvalidDataException">When it is unable to automatically determine the field separator.</exception>
 		public static string DetermineCSVSeparator (string path) {
+			if (System.IO.Path.GetExtension(path).Equals(@".tsv", StringComparison.InvariantCultureIgnoreCase))
+				return "\t";
 			const int maxLinesToExamine = 3;
-			var possibleSeparators = new [] { @",", @";", "\t", @"|" };
-			var results = new [] { System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator }.Concat(possibleSeparators).Distinct().Select(s => {
+			var possibleSeparators = new [] { @",", @";", "\t", @"|", System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator }.Distinct();
+			var results = possibleSeparators.Select(s => {
 				List<int> c = null;
 				try {
 					c = OpenCSV(path, s).Take(maxLinesToExamine).Select(r => r.Length).Distinct().ToList();
