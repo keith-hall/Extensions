@@ -178,6 +178,11 @@ namespace HallLibrary.Extensions
 		}
 		#endregion
 		
+		/// <summary>
+		/// Determine if the input <see cref="String" /> <paramref name="value" /> is a valid number, date or boolean value.
+		/// </summary>
+		/// <param name="value">The <see cref="String" /> to attempt to convert.</param>
+		/// <returns>The <see cref="String" /> <paramref name="value" /> if not possible to convert, otherwise a <see cref="Decimal" />, <see cref="DateTime" /> or <see cref="Boolean" />.</returns>
 		internal static object ConvertValueFromString(string value) {
 			decimal valAsDecimal;
 			if (!(value.StartsWith(@"0") && value.Length > 1) // ignore it if it starts with 0
@@ -200,6 +205,14 @@ namespace HallLibrary.Extensions
 			});
 		}
 		
+		/// <summary>
+		/// Apply the given <paramref name="projection" /> to all values in a <paramref name="column" /> and replace it with a new column with the relevant datatype.
+		/// </summary>
+		/// <param name="column">The column to apply the <paramref name="projection" /> on.</param>
+		/// <param name="toMixed">If false, each value must be of the same type after projection.  If true, the column DataType becomes object.</param>
+		/// <exception cref="ArgumentNullException">The specified <paramref name="column" /> is <c>null</c>.</exception>
+		/// <exception cref="ArgumentNullException">The <paramref name="projection" /> is <c>null</c>.</exception>
+		/// <exception cref="InvalidOperationException"><paramref name="toMixed" /> is false and the specified <paramref name="column" /> contains multiple types after <paramref name="projection" />.</exception>
 		public static void Convert (this DataColumn column, Func<object, object> projection, bool toMixed) {
 			var rows = column.Table.Rows.OfType<DataRow>().Select(row => projection(row[column]));
 			var items = new List<object>(column.Table.Rows.Count);
