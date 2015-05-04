@@ -48,7 +48,12 @@ namespace HallLibrary.Extensions
 			if (inferTypes) {
 				//x for (var col = 0; col < dt.Columns.Count; col ++)
 				// x	dt.Columns[col].ConvertFromString();
-				Parallel.ForEach(dt.Columns.OfType<DataColumn>().ToList(), col => dt.Columns[col.ColumnName].ConvertFromString());
+				Parallel.ForEach(dt.Columns.OfType<DataColumn>().ToList(), col => {
+					try {
+						dt.Columns[col.ColumnName].ConvertFromString();
+					} catch (InvalidOperationException) {
+					}
+				});
 			}
 			return dt;
 		}
@@ -201,14 +206,12 @@ namespace HallLibrary.Extensions
 			foreach (var row in rows) {
 				if (row != null) {
 					firstNonNull = firstNonNull ?? row;
-					if (items.Any() && !row.GetType().Equals(firstNonNull.GetType())) { // data type of all items don't match
-						items = null;
-						break;
-					}
+					if (items.Any() && !row.GetType().Equals(firstNonNull.GetType())) // data type of all items don't match
+						throw new InvalidOperationException("Not all items are of the same type when converted from a string");
 				}
 				items.Add(row);
 			}
-			if (items != null && firstNonNull != null) {
+			if (firstNonNull != null) {
 				lock (column.Table) {
 					var ordinal = column.Ordinal;
 					var table = column.Table;
