@@ -198,19 +198,8 @@ namespace HallLibrary.Extensions
 			});
 		}
 		
-		/// <summary>
-		/// Infer the data type for each value in the specified <paramref name="column" /> containing <see cref="String" />s.
-		/// </summary>
-		/// <param name="column">The column containing <see cref="String" />s for which to infer the datatype.</param>
-		/// <param name="toMixed">If false, each value converted from string must be of the same type.  If true, the column DataType becomes object.</param>
-		/// <exception cref="ArgumentException">The DataType of the specified <paramref name="column" /> is not <see cref="String" />.</exception>
-		/// <exception cref="ArgumentNullException">The specified <paramref name="column" /> is <c>null</c>.</exception>
-		/// <exception cref="InvalidOperationException"><paramref name="toMixed" /> is false and the specified <paramref name="column" /> contains multiple types when converting from <see cref="String" />.</exception>
-		public static void ConvertFromString (this DataColumn column, bool toMixed) {
-			if (! column.DataType.Equals(typeof(string)))
-				throw new ArgumentException("Column DataType is not String", "column");
-			
-			var rows = column.Table.Rows.OfType<DataRow>().Select(row => ConvertValueFromString((string)row[column]));
+		public static void Convert (this DataColumn column, Func<object, object> projection, bool toMixed) {
+			var rows = column.Table.Rows.OfType<DataRow>().Select(row => projection(row[column]));
 			var items = new List<object>(column.Table.Rows.Count);
 			Type newType = null;
 			foreach (var row in rows) {
@@ -220,7 +209,7 @@ namespace HallLibrary.Extensions
 						if (toMixed)
 							newType = typeof(object);
 						else
-							throw new InvalidOperationException("Not all items are of the same type when converted from a string");
+							throw new InvalidOperationException("Not all items are of the same type after projection");
 					}
 				}
 				items.Add(row);
@@ -247,6 +236,21 @@ namespace HallLibrary.Extensions
 					table.EndLoadData();
 				}
 			}
+		}
+		
+		/// <summary>
+		/// Infer the data type for each value in the specified <paramref name="column" /> containing <see cref="String" />s.
+		/// </summary>
+		/// <param name="column">The column containing <see cref="String" />s for which to infer the datatype.</param>
+		/// <param name="toMixed">If false, each value converted from string must be of the same type.  If true, the column DataType becomes object.</param>
+		/// <exception cref="ArgumentException">The DataType of the specified <paramref name="column" /> is not <see cref="String" />.</exception>
+		/// <exception cref="ArgumentNullException">The specified <paramref name="column" /> is <c>null</c>.</exception>
+		/// <exception cref="InvalidOperationException"><paramref name="toMixed" /> is false and the specified <paramref name="column" /> contains multiple types when converting from <see cref="String" />.</exception>
+		public static void ConvertFromString (this DataColumn column, bool toMixed) {
+			if (! column.DataType.Equals(typeof(string)))
+				throw new ArgumentException("Column DataType is not String", "column");
+			
+			Convert(column, value => ConvertValueFromString((string)value), toMixed);
 		}
 		
 		internal static string GetValueBase(object value, string nullSubstitution, string byteArrayPrefix, Func<string, string> escapeIfNecessary) {
