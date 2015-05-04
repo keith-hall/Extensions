@@ -132,7 +132,7 @@ namespace HallLibrary.Extensions
 		public static string DetermineCSVSeparator (string path) {
 			const int maxLinesToExamine = 3;
 			var possibleSeparators = new [] { @",", @";", "\t", @"|" };
-			var results = possibleSeparators.Select(s => {
+			var results = new [] { System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator }.Concat(possibleSeparators).Distinct().Select(s => {
 				List<int> c = null;
 				try {
 					c = OpenCSV(path, s).Take(maxLinesToExamine).Select(r => r.Length).Distinct().ToList();
