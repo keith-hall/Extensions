@@ -46,8 +46,9 @@ namespace HallLibrary.Extensions
 			dt.EndLoadData();
 			
 			if (inferTypes) {
-				for (var col = 0; col < dt.Columns.Count; col ++)
-					dt.Columns[col].ConvertFromString();
+				//x for (var col = 0; col < dt.Columns.Count; col ++)
+				// x	dt.Columns[col].ConvertFromString();
+				Parallel.ForEach(dt.Columns.OfType<DataColumn>().ToList(), col => dt.Columns[col.ColumnName].ConvertFromString());
 			}
 			return dt;
 		}
@@ -196,33 +197,39 @@ namespace HallLibrary.Extensions
 			
 			var rows = column.Table.Rows.OfType<DataRow>().Select(row => ConvertValueFromString((string)row[column]));
 			var items = new List<object>(column.Table.Rows.Count);
+			object firstNonNull = null;
 			foreach (var row in rows) {
-				if (row != null && items.Any() && !row.GetType().Equals(items.First().GetType())) { // data type of all items don't match
-					items = null;
-					break;
+				if (row != null) {
+					firstNonNull = firstNonNull ?? row;
+					if (items.Any() && !row.GetType().Equals(firstNonNull.GetType())) { // data type of all items don't match
+						items = null;
+						break;
+					}
 				}
 				items.Add(row);
 			}
-			if (items != null && items.Any(item => item != null)) {
-				var ordinal = column.Ordinal;
-				var table = column.Table;
-				table.BeginLoadData();
-				
-				var newType = items.First(item => item != null).GetType();
-				if (newType.Equals(typeof(decimal)))
-					if (! items.Any(value => value != null && ((decimal)value > int.MaxValue || value.ToString().Contains(@"."))))
-						newType = typeof(int);
-				
-				var newColumn = new DataColumn(column.ColumnName, newType);
-				table.Columns.Remove(column);
-				
-				table.Columns.Add(newColumn);
-				newColumn.SetOrdinal(ordinal);
-				
-				foreach (var row in table.Rows.OfType<DataRow>().Zip(items, (dr, newValue) => Tuple.Create(dr, newValue)))
-					row.Item1[newColumn] = row.Item2;
-				
-				table.EndLoadData();
+			if (items != null && firstNonNull != null) {
+				lock (column.Table) {
+					var ordinal = column.Ordinal;
+					var table = column.Table;
+					table.BeginLoadData();
+					
+					var newType = firstNonNull.GetType();
+					if (newType.Equals(typeof(decimal)))
+						if (! items.Any(value => value != null && ((decimal)value > int.MaxValue || value.ToString().Contains(@"."))))
+							newType = typeof(int);
+					
+					var newColumn = new DataColumn(column.ColumnName, newType);
+					table.Columns.Remove(column);
+					
+					table.Columns.Add(newColumn);
+					newColumn.SetOrdinal(ordinal);
+					
+					foreach (var row in table.Rows.OfType<DataRow>().Zip(items, (dr, newValue) => Tuple.Create(dr, newValue)))
+						row.Item1[newColumn] = row.Item2;
+					
+					table.EndLoadData();
+				}
 			}
 		}
 		
