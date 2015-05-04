@@ -46,19 +46,12 @@ namespace HallLibrary.Extensions
 			
 			dt.EndLoadData();
 			
-			if (inferTypes) {
-				//x for (var col = 0; col < dt.Columns.Count; col ++)
-				// x	dt.Columns[col].ConvertFromString();
-				Parallel.ForEach(dt.Columns.OfType<DataColumn>().ToList(), col => {
-					try {
-						dt.Columns[col.ColumnName].ConvertFromString(false);
-					} catch (InvalidOperationException) {
-					}
-				});
-			}
+			if (inferTypes)
+				ConvertColumnsFromString(dt, false);
+			
 			return dt;
 		}
-	
+		
 		public static DataTable ToDataTable(this IEnumerable<IDictionary<string, object>> csv, string name = null)
 		{
 			var result = new DataTable(name);
@@ -196,7 +189,23 @@ namespace HallLibrary.Extensions
 			return value;
 		}
 		
-		// infer the data type if same for all values in a column
+		public static void ConvertColumnsFromString (this DataTable dt, bool toMixed) {
+			Parallel.ForEach(dt.Columns.OfType<DataColumn>().Where(col => col.DataType == typeof(string)).ToList(), col => {
+				try {
+					dt.Columns[col.ColumnName].ConvertFromString(toMixed);
+				} catch (InvalidOperationException) {
+				}
+			});
+		}
+		
+		/// <summary>
+		/// Infer the data type for each value in the specified <paramref name="column" /> containing <see cref="String" />s.
+		/// </summary>
+		/// <param name="column">The column containing <see cref="String" />s for which to infer the datatype.</param>
+		/// <param name="toMixed">If false, each value converted from string must be of the same type.  If true, the column DataType becomes object.</param>
+		/// <exception cref="ArgumentException">The DataType of the specified <paramref name="column" /> is not <see cref="String" />.</exception>
+		/// <exception cref="ArgumentNullException">The specified <paramref name="column" /> is <c>null</c>.</exception>
+		/// <exception cref="InvalidOperationException"><paramref name="toMixed" /> is false and the specified <paramref name="column" /> contains multiple types when converting from <see cref="String" />.</exception>
 		public static void ConvertFromString (this DataColumn column, bool toMixed) {
 			if (! column.DataType.Equals(typeof(string)))
 				throw new ArgumentException("Column DataType is not String", "column");
