@@ -38,7 +38,7 @@ User@id | FirstName | LastName | UserName | Address.BuildingNumber | Address.Str
 
 using the following code:
 ```cs
-DataTableExtensions.ReadXML(XmlReader.Create(@"\\path\to\file.xml"), @"User", false /* don't shorten column names*/, true /* include attributes */);
+DataTableExtensions.ReadXML(XmlReader.Create(@"\\path\to\file.xml"), @"User", "." /* don't shorten column names*/, true /* include attributes */, true /* reverse hierarchy */);
 ```
 
 ## String Extensions
