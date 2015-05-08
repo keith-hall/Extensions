@@ -17,7 +17,7 @@ namespace Tests
 			// ReSharper disable once PossibleMultipleEnumeration
 			Assert.AreEqual(src.CountExceeds(3), true);
 
-			// just doing a Count would give a DivideByZero exception
+			// just doing a Count would give a DivideByZero exception - this could also be demonstrated with the [ExpectedException(typeof(DivideByZeroException))] attribute on this method, but we want to test multiple conditions in a single method
 			try
 			{
 				// ReSharper disable once PossibleMultipleEnumeration
