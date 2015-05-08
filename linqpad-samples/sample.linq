@@ -1,4 +1,6 @@
 <Query Kind="Statements">
+  <Reference>.\test.xml</Reference>
+  <Reference>.\example.html</Reference>
   <NuGetReference>HallLibrary.Extensions</NuGetReference>
   <Namespace>HallLibrary.Extensions</Namespace>
 </Query>
