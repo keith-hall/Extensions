@@ -47,7 +47,8 @@
 	HallLibrary.Extensions.DataTableExtensions.ReadXML(
 		XmlReader.Create(Util.GetFullPath(@"test.xml")),
 		@"User",
-		false /* don't shorten column names*/,
-		true /* include attributes */
+		"." /* don't shorten column names*/,
+		true /* include attributes */,
+		true /* reverse hierarchy */
 	).Dump(@"DataTable from XML");
 #endregion
