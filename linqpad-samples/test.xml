@@ -1,0 +1,23 @@
+<root>
+  <User id="1">
+    <FirstName>Fred</FirstName>
+    <LastName>Bloggs</LastName>
+    <UserName>bloggsf</UserName>
+    <Address>
+      <BuildingNumber>12</BuildingNumber>
+      <Street>The Street</Street>
+      <Town>Exampletown</Town>
+    </Address>
+  </User>
+  <User id="3">
+    <UserName>bloggsj</UserName>
+    <FirstName>Joe</FirstName>
+    <LastName>Bloggs</LastName>
+    <Address>
+      <BuildingNumber>9</BuildingNumber>
+      <Street>Somewhere Else</Street>
+      <Town>Exampletown</Town>
+      <PostCode>TY12 6UA</PostCode>
+    </Address>
+  </User>
+</root>
