@@ -400,18 +400,21 @@ namespace HallLibrary.Extensions
 		/// </summary>
 		/// <param name="xr">The <see cref="XmlReader" /> to use to build the <see cref="DataTable"/>.</param>
 		/// <param name="row">The name of the XML element that represents a row.</param>
-		/// <param name="shortNames">Use short column names, as opposed to the path relative to the <paramref name="row"/>.</param>
+		/// <param name="hierarchySeparator">If null, will use short column names, as opposed to the path relative to the <paramref name="row"/>.</param>
 		/// <param name="includeAttributes">Include attributes in the <see cref="DataTable"/>.</param>
+		/// <param name="reverseHierarchy">Reverse the order of the column name hierarchy when not using short column names.</param> 
 		/// <returns>A <see cref="DataTable"/> representing the XML.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="row"/> is null.</exception>
 		/// <exception cref="ArgumentNullException"><paramref name="xr"/> is null.</exception>
-		public static DataTable ReadXML(XmlReader xr, string row, bool shortNames, bool includeAttributes)
+		public static DataTable ReadXML(XmlReader xr, string row, string hierarchySeparator = null, bool includeAttributes = false, bool reverseHierarchy = false)
 		{
 			if (string.IsNullOrEmpty(row))
 				throw new ArgumentNullException("row");
 			if (xr == null)
 				throw new ArgumentNullException("xr");
-
+			
+			bool shortNames = (hierarchySeparator == null);
+			hierarchySeparator = hierarchySeparator ?? @"/";
 			var stack = new Stack<string>();
 			var dt = new DataTable();
 
@@ -422,7 +425,9 @@ namespace HallLibrary.Extensions
 					var level = stack.TakeWhile(v => !v.Equals(row));
 					if (name != null)
 						level = Enumerable.Concat(new[] { name }, level);
-					var col = string.Join("/", level);
+					if (reverseHierarchy)
+						level = level.Reverse();
+					var col = string.Join(hierarchySeparator, level);
 					if (!dt.Columns.Contains(col))
 						dt.Columns.Add(col);
 
@@ -475,7 +480,7 @@ namespace HallLibrary.Extensions
 
 			if (shortNames)
 			{
-				var cols = dt.Columns.OfType<DataColumn>().Select(dc => new { Column = dc, FullName = dc.ColumnName, ShortName = dc.ColumnName.Split('/').First() }).GroupBy(c => c.ShortName).Where(g => g.Count() == 1).Select(g => g.First());
+				var cols = dt.Columns.OfType<DataColumn>().Select(dc => new { Column = dc, FullName = dc.ColumnName, ShortName = dc.ColumnName.Split(hierarchySeparator, StringSplitOptions.None).First() }).GroupBy(c => c.ShortName).Where(g => g.Count() == 1).Select(g => g.First());
 				foreach (var col in cols)
 					col.Column.ColumnName = col.ShortName;
 			}
