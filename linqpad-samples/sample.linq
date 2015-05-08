@@ -1,7 +1,5 @@
 <Query Kind="Statements">
   <NuGetReference>HallLibrary.Extensions</NuGetReference>
-  <Reference>test.xml</Reference>
-  <Reference>example.html</Reference>
   <Namespace>HallLibrary.Extensions</Namespace>
 </Query>
 
@@ -35,7 +33,7 @@
 	string.Format("\"{0}\" contains {1} occurrences of \"{2}\"", text, text.CountOccurrences(substring), substring).Dump(@"count occurrences");
 	
 	// demonstrating simple lightweight html extractor
-	text = File.ReadAllText(Util.GetFullPath(@"example.html"));
+	text = File.ReadAllText(Util.GetSampleFilePath(@"HallLibrary.Extensions", @"example.html"));
 	var list = text.TextBetween(@"<ul>", @"</ul>");
 	var listItems = list.AllTextBetween(@"<li>", @"</li>");
 	listItems.Dump(@"contents of li tags");
@@ -45,7 +43,7 @@
 
 #region DataTable From XML
 	HallLibrary.Extensions.DataTableExtensions.ReadXML(
-		XmlReader.Create(Util.GetFullPath(@"test.xml")),
+		XmlReader.Create(Util.GetSampleFilePath(@"HallLibrary.Extensions", @"test.xml")),
 		@"User",
 		false /* don't shorten column names*/,
 		true /* include attributes */
