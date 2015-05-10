@@ -52,6 +52,34 @@ namespace HallLibrary.Extensions
 		{
 			return enumerable.Take(count + 1).Count() > count;
 		}
+		
+		/// <summary>
+		/// Returns <c>true</c> if the number of elements in the <paramref name="enumerable"/> equals the specified <paramref name="count"/>, without enumerating through every element.
+		/// </summary>
+		/// <typeparam name="T">The type of elements in the enumerable.</typeparam>
+		/// <param name="enumerable">The enumerable sequence to check.</param>
+		/// <param name="count">The count to match.</param>
+		/// <returns>Returns <c>true</c> if the number of elements in the <paramref name="enumerable"/> equals the specified <paramref name="count"/>.</returns>
+		public static bool CountEquals<T>(this IEnumerable<T> enumerable, int count)
+		{
+			// note that this works because if there are more items than count, we just take one extra and compare it, which will return false
+			// if there are less items, it will return false
+			// and if there are count items, it can only take count, so the comparison will succeed
+			return enumerable.Take(count + 1).Count() == count;
+		}
+		
+		
+		/// <summary>
+		/// Returns <c>true</c> if the number of elements in the <paramref name="enumerable"/> is less than the specified <paramref name="count"/>, without enumerating through every element.
+		/// </summary>
+		/// <typeparam name="T">The type of elements in the enumerable.</typeparam>
+		/// <param name="enumerable">The enumerable sequence to check.</param>
+		/// <param name="count">The count to compare.</param>
+		/// <returns>Returns <c>true</c> if the number of elements in the <paramref name="enumerable"/> is less than the specified <paramref name="count"/>.</returns>
+		public static bool CountIsLessThan<T>(this IEnumerable<T> enumerable, int count)
+		{
+			return enumerable.Take(count).Count() < count;
+		}
 
 		/// <summary>
 		/// Converts the current <paramref name="value"/> to an enumerable, containing the <paramref name="value"/> as it's sole element.
