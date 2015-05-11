@@ -15,7 +15,7 @@ namespace HallLibrary.Extensions
 	public static class DataTableExtensions
 	{
 		#region CSV
-		public static void ConvertToCSV(this DataTable table, TextWriter writer, string separator = "\t")
+		public static void WriteToCSV(this DataTable table, TextWriter writer, string separator = "\t")
 		{
 			CSV.Write(
 				table.Columns.OfType<DataColumn>().Select(c => c.Caption),
