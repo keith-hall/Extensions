@@ -42,7 +42,7 @@ namespace HallLibrary.Extensions
 		}
 
 		/// <summary>
-		/// Returns <c>true</c> if the number of elements in the <paramref name="enumerable"/> exceeds the specified <paramref name="count"/>, without enumerating through every element.
+		/// Returns <c>true</c> if the number of elements in the <paramref name="enumerable"/> exceeds the specified <paramref name="count"/>, iterating through only the minimum number of elements in the sequence necessary to determine the answer.
 		/// </summary>
 		/// <typeparam name="T">The type of elements in the enumerable.</typeparam>
 		/// <param name="enumerable">The enumerable sequence to check.</param>
@@ -54,7 +54,7 @@ namespace HallLibrary.Extensions
 		}
 		
 		/// <summary>
-		/// Returns <c>true</c> if the number of elements in the <paramref name="enumerable"/> equals the specified <paramref name="count"/>, without enumerating through every element.
+		/// Returns <c>true</c> if the number of elements in the <paramref name="enumerable"/> equals the specified <paramref name="count"/>, iterating through only the minimum number of elements in the sequence necessary to determine the answer.
 		/// </summary>
 		/// <typeparam name="T">The type of elements in the enumerable.</typeparam>
 		/// <param name="enumerable">The enumerable sequence to check.</param>
@@ -70,7 +70,7 @@ namespace HallLibrary.Extensions
 		
 		
 		/// <summary>
-		/// Returns <c>true</c> if the number of elements in the <paramref name="enumerable"/> is less than the specified <paramref name="count"/>, without enumerating through every element.
+		/// Returns <c>true</c> if the number of elements in the <paramref name="enumerable"/> is less than the specified <paramref name="count"/>, iterating through only the minimum number of elements in the sequence necessary to determine the answer.
 		/// </summary>
 		/// <typeparam name="T">The type of elements in the enumerable.</typeparam>
 		/// <param name="enumerable">The enumerable sequence to check.</param>
