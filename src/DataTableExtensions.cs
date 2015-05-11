@@ -158,7 +158,7 @@ namespace HallLibrary.Extensions
 				);
 			}
 			
-			writer.WriteLine(@"insert into " + tableName + @" (" +
+			writer.WriteLine(@"insert into " + (tableName.StartsWith(tableVariableChar) ? tableName : escapeIfNecessary(tableName)) + @" (" +
 				string.Join(@", ", dt.Columns.OfType<DataColumn>().Select(
 					col => escapeIfNecessary(col.ColumnName)
 				)) + @") values");
