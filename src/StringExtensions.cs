@@ -11,6 +11,7 @@ namespace HallLibrary.Extensions
 	/// </summary>
 	public static class StringExtensions
 	{
+		#region IndexOf related methods
 		/// <summary>
 		/// Reports the zero-based index of the <i>end</i> of the first occurrence of the specified <paramref name="find" /> string in the current <see cref="System.String" /> object.
 		/// </summary>
@@ -86,7 +87,9 @@ namespace HallLibrary.Extensions
 			var indexes = AllIndexesOf(value, find);
 			return indexes.OrderBy(i => i.Value);
 		}
+		#endregion
 
+		#region Text related methods
 		/// <summary>
 		/// Reports the number of times the specified <paramref name="find" /> string occurs in the current <see cref="System.String" /> object.
 		/// </summary>
@@ -176,5 +179,6 @@ namespace HallLibrary.Extensions
 				}
 			}
 		}
+		#endregion
 	}
 }
