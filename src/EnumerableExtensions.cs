@@ -9,6 +9,7 @@ namespace HallLibrary.Extensions
 	/// </summary>
 	public static class EnumerableExtensions
 	{
+		#region Shuffle
 		/// <summary>
 		/// Randomise the order of the elements in the <paramref name="source"/> enumerable.
 		/// </summary>
@@ -40,7 +41,9 @@ namespace HallLibrary.Extensions
 				elements[swapIndex] = elements[i];
 			}
 		}
-
+		#endregion
+		
+		#region Count
 		/// <summary>
 		/// Returns <c>true</c> if the number of elements in the <paramref name="enumerable"/> exceeds the specified <paramref name="count"/>, iterating through only the minimum number of elements in the sequence necessary to determine the answer.
 		/// </summary>
@@ -80,6 +83,7 @@ namespace HallLibrary.Extensions
 		{
 			return enumerable.Take(count).Count() < count;
 		}
+		#endregion
 
 		/// <summary>
 		/// Converts the current <paramref name="value"/> to an enumerable, containing the <paramref name="value"/> as it's sole element.
