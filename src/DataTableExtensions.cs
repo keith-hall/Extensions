@@ -17,19 +17,12 @@ namespace HallLibrary.Extensions
 		#region CSV
 		public static void ConvertToCSV(this DataTable table, TextWriter writer, string separator = "\t")
 		{
-			var lines = table.Rows.OfType<DataRow>().Select(row => string.Join(separator,
-				table.Columns.OfType<DataColumn>().Select(col =>
-					CSV.GetValueForCSV(row[col], separator)
-				)
-			));
-			
-			writer.WriteLine(string.Join(separator,
-				table.Columns.OfType<DataColumn>().Select(c => c.Caption)));
-			
-			foreach (var line in lines)
-				writer.WriteLine(line);
-			
-			writer.Flush();
+			CSV.Write(
+				table.Columns.OfType<DataColumn>().Select(c => c.Caption),
+				table.Rows.OfType<DataRow>().Select(row => row.ItemArray),
+				writer,
+				separator
+			);
 		}
 		#endregion
 		
@@ -317,6 +310,21 @@ namespace HallLibrary.Extensions
 				s = s.Replace(quote, @"\" + quote); // replace quotes with a backslash and then a quote
 				return s.IndexOf(separator, StringComparison.InvariantCultureIgnoreCase) > -1 ? (quote + s + quote) : s;
 			});
+		}
+		
+		public static void Write(IEnumerable<string> headers, IEnumerable<IEnumerable<object>> values, TextWriter writer, string separator = "\t")
+		{
+			var lines = values.Select(row => string.Join(separator,
+				row.Select(cell => CSV.GetValueForCSV(cell, separator))
+			));
+			
+			if (headers != null && headers.Any())
+				writer.WriteLine(string.Join(separator, headers));
+			
+			foreach (var line in lines)
+				writer.WriteLine(line);
+			
+			writer.Flush();
 		}
 		
 		/*public static IEnumerable<System.Dynamic.ExpandoObject> FromCSVEnumerable(IEnumerable<IEnumerable<string>> csv)
