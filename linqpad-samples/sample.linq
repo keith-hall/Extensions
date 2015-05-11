@@ -44,7 +44,7 @@
 #endregion
 
 #region DataTable From XML
-	HallLibrary.Extensions.DataTableExtensions.ReadXML(
+	XML.ToDataTable(
 		XmlReader.Create(Util.GetFullPath(@"test.xml")),
 		@"User",
 		"." /* don't shorten column names*/,
