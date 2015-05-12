@@ -104,12 +104,14 @@ namespace HallLibrary.Extensions
 		public static void TableToSQLInsert(this DataTable dt, string tableName, bool createTable, TextWriter writer)
 		{
 			Func<string, string> escapeIfNecessary = name => {
+				// TODO: split by dot and then check each substring for square brackets, to allow for cross-database create table
 				if (!name.StartsWith(@"[")) // TODO: could also check if contains invalid characters, rather than always escaping...
 					return @"[" + name + @"]";
 				else
 					return name;
 			};
 			
+			const string tableVariableChar = @"@";
 			if (createTable)
 			{
 				Func<DataColumn, string> ColumnDataTypeToSQL = col => {
@@ -149,7 +151,6 @@ namespace HallLibrary.Extensions
 					sql += ((nullable) ? string.Empty : @" not") + @" null";
 					return sql;
 				};
-				const string tableVariableChar = @"@";
 				writer.WriteLine((tableName.StartsWith(tableVariableChar) ? @"DECLARE " + tableName : @"CREATE TABLE " + escapeIfNecessary(tableName)) + (tableName.StartsWith(tableVariableChar) ? @" TABLE " : string.Empty) + @" (" +
 					string.Join(
 						@", ",
