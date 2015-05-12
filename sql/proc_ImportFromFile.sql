@@ -1,9 +1,9 @@
 USE [darbine]
 GO
-IF OBJECT_ID('sp_ImportCardHashData', N'P') IS NOT NULL
-	EXEC ('DROP PROCEDURE sp_ImportCardHashData')
+IF OBJECT_ID('proc_ImportCardHashData', N'P') IS NOT NULL
+	EXEC ('DROP PROCEDURE proc_ImportCardHashData')
 GO
-CREATE PROCEDURE sp_ImportCardHashData
+CREATE PROCEDURE proc_ImportCardHashData
 	@FromFile NVARCHAR(1000),
 	@Separator CHAR(1) = ';',
 	@Header NVARCHAR(600) = NULL,
