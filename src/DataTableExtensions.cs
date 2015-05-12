@@ -49,7 +49,7 @@ namespace HallLibrary.Extensions
 			var items = new List<object>(column.Table.Rows.Count);
 			Type newType = null;
 			foreach (var row in rows) {
-				if (row != null && newType != typeof(object)) {
+				if (row != null && row != DBNull.Value && newType != typeof(object)) {
 					newType = newType ?? row.GetType();
 					if (!row.GetType().Equals(newType)) { // data type of all items don't match
 						if (toMixed)
@@ -67,7 +67,7 @@ namespace HallLibrary.Extensions
 					table.BeginLoadData();
 					
 					if (newType.Equals(typeof(decimal)))
-						if (! items.Any(value => value != null && ((decimal)value > int.MaxValue || value.ToString().Contains(@"."))))
+						if (! items.Any(value => value != null && value != DBNull.Value && ((decimal)value > int.MaxValue || value.ToString().Contains(@"."))))
 							newType = typeof(int);
 					
 					var newColumn = new DataColumn(column.ColumnName, newType);
@@ -487,7 +487,7 @@ namespace HallLibrary.Extensions
 		}
 		
 		internal static string GetValueBase(object value, string nullSubstitution, string byteArrayPrefix, Func<string, string> escapeIfNecessary) {
-			if (value == null)
+			if (value == null || value == DBNull.Value)
 				return nullSubstitution;
 			
 			Func<bool, string> toBoolString = b => escapeIfNecessary(b ? @"1" : @"0");
