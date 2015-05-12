@@ -122,7 +122,7 @@ namespace HallLibrary.Extensions
 					Func<Func<object, int>, string> getMaxLength = getLength => {
 						var max = 1;
 						if (rows.Any())
-							max = Math.Max(max, rows.Where(dr => dr[col] != null).Max(dr => getLength(dr[col])));
+							max = Math.Max(max, rows.Where(dr => dr[col] != null && !(dr[col] is DBNull)).Max(dr => getLength(dr[col])));
 						return @"(" + max.ToString() + @")";
 					};
 					
