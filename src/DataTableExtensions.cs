@@ -45,20 +45,20 @@ namespace HallLibrary.Extensions
 		/// <exception cref="ArgumentNullException">The <paramref name="projection" /> is <c>null</c>.</exception>
 		/// <exception cref="InvalidOperationException"><paramref name="toMixed" /> is false and the specified <paramref name="column" /> contains multiple types after <paramref name="projection" />.</exception>
 		public static void Convert (this DataColumn column, Func<object, object> projection, bool toMixed) {
-			var rows = column.Table.Rows.OfType<DataRow>().Select(row => projection(row[column]));
+			var cells = column.Table.Rows.OfType<DataRow>().Select(row => projection(row[column]));
 			var items = new List<object>(column.Table.Rows.Count);
 			Type newType = null;
-			foreach (var row in rows) {
-				if (row != null && row != DBNull.Value && newType != typeof(object)) {
-					newType = newType ?? row.GetType();
-					if (!row.GetType().Equals(newType)) { // data type of all items don't match
+			foreach (var cell in cells) {
+				if (cell != null && !(cell is DBNull) && newType != typeof(object)) {
+					newType = newType ?? cell.GetType();
+					if (!cell.GetType().Equals(newType)) { // data type of all items don't match
 						if (toMixed)
 							newType = typeof(object);
 						else
 							throw new InvalidOperationException("Not all items are of the same type after projection");
 					}
 				}
-				items.Add(row);
+				items.Add(cell);
 			}
 			if (newType != null) {
 				lock (column.Table) {
@@ -488,7 +488,7 @@ namespace HallLibrary.Extensions
 		}
 		
 		internal static string GetValueBase(object value, string nullSubstitution, string byteArrayPrefix, Func<string, string> escapeIfNecessary) {
-			if (value == null || value == DBNull.Value)
+			if (value == null || value is DBNull)
 				return nullSubstitution;
 			
 			Func<bool, string> toBoolString = b => escapeIfNecessary(b ? @"1" : @"0");
