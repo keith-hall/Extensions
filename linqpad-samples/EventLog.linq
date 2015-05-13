@@ -1,8 +1,8 @@
 <Query Kind="Program">
   <Output>DataGrids</Output>
   <Reference>&lt;RuntimeDirectory&gt;\System.Management.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\System.Configuration.Install.dll</Reference>
   <Namespace>System.Management</Namespace>
+  <Namespace>Microsoft.VisualBasic</Namespace>
 </Query>
 
 void Main(string[] args)
@@ -15,10 +15,14 @@ void Main(string[] args)
 		// TODO: read command line arguments
 	#else
 		// LINQPad GUI
-		// TODO: prompt user for values?
-		// use defaults
-		machine = Environment.MachineName; // current machine
-		since = DateTime.Now.AddDays(-1); // within a day (24 hours)
+		try {
+			machine = GetInput("Machine", Environment.MachineName, value => !string.IsNullOrEmpty(value)); // default to this machine
+			since = DateTime.Now.AddDays(-1).Date; // default to since yesterday midnight
+			GetInput("Since", since.ToString(), value => DateTime.TryParse(value, out since));
+		} catch (InvalidDataException) {
+			"Query Cancelled!".Dump();
+			return;
+		}
 	#endif
 	
 	var conOpt = new ConnectionOptions();
@@ -31,7 +35,6 @@ void Main(string[] args)
 	
 	if (scope.IsConnected)
 	{
-		
 		var query = new SelectQuery("Select * from Win32_NTLogEvent Where Logfile = 'Application' and TimeGenerated >='" + ManagementDateTimeConverter.ToDmtfDateTime(since) + "'");
 		var searcher = new ManagementObjectSearcher(scope, query);
 		var logs = searcher.Get().OfType<ManagementObject>();
@@ -46,4 +49,25 @@ void Main(string[] args)
 			//User = FromLog(l, "User")
 		}).Dump();
 	}
+}
+
+// Define other methods and classes here
+public static string GetInput (string question, string defaultValue, Func<string, bool> validate = null) {
+	bool fromCache;
+	var path = Util.Cache(() => Path.GetTempFileName(), question, out fromCache);
+	
+	if (fromCache)
+		defaultValue = File.ReadAllText(path);
+	
+	var value = Interaction.InputBox(question, "Query", defaultValue);
+	if (validate != null) {
+		if (validate(value))
+			File.WriteAllText(path, value);
+		else {
+			if (!fromCache)
+				File.WriteAllText(path, defaultValue); // write default value to file
+			throw new InvalidDataException();
+		}
+	}
+	return value;
 }
