@@ -53,21 +53,13 @@ void Main(string[] args)
 
 // Define other methods and classes here
 public static string GetInput (string question, string defaultValue, Func<string, bool> validate = null) {
-	bool fromCache;
-	var path = Util.Cache(() => Path.GetTempFileName(), question, out fromCache);
+	var cached = AppDomain.CurrentDomain.GetData(question);
 	
-	if (fromCache)
-		defaultValue = File.ReadAllText(path);
+	var value = Interaction.InputBox(question, "Query", (string)cached ?? defaultValue);
+	if (validate == null || validate(value))
+		AppDomain.CurrentDomain.SetData(question, value);
+	else if (validate != null)
+		throw new InvalidDataException();
 	
-	var value = Interaction.InputBox(question, "Query", defaultValue);
-	if (validate != null) {
-		if (validate(value))
-			File.WriteAllText(path, value);
-		else {
-			if (!fromCache)
-				File.WriteAllText(path, defaultValue); // write default value to file
-			throw new InvalidDataException();
-		}
-	}
 	return value;
 }
