@@ -27,7 +27,8 @@ namespace HallLibrary.Extensions
 		#endregion
 		
 		#region Conversion
-		public static void ConvertColumnsFromString (this DataTable dt, bool toMixed) {
+		public static void ConvertColumnsFromString (this DataTable dt, bool toMixed)
+		{
 			Parallel.ForEach(dt.Columns.OfType<DataColumn>().Where(col => col.DataType == typeof(string)).ToList(), col => {
 				try {
 					dt.Columns[col.ColumnName].ConvertFromString(toMixed);
@@ -44,7 +45,8 @@ namespace HallLibrary.Extensions
 		/// <exception cref="ArgumentNullException">The specified <paramref name="column" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentNullException">The <paramref name="projection" /> is <c>null</c>.</exception>
 		/// <exception cref="InvalidOperationException"><paramref name="toMixed" /> is false and the specified <paramref name="column" /> contains multiple types after <paramref name="projection" />.</exception>
-		public static void Convert (this DataColumn column, Func<object, object> projection, bool toMixed) {
+		public static void Convert (this DataColumn column, Func<object, object> projection, bool toMixed)
+		{
 			var cells = column.Table.Rows.OfType<DataRow>().Select(row => projection(row[column]));
 			var items = new List<object>(column.Table.Rows.Count);
 			Type newType = null;
@@ -92,7 +94,8 @@ namespace HallLibrary.Extensions
 		/// <exception cref="ArgumentException">The DataType of the specified <paramref name="column" /> is not <see cref="String" />.</exception>
 		/// <exception cref="ArgumentNullException">The specified <paramref name="column" /> is <c>null</c>.</exception>
 		/// <exception cref="InvalidOperationException"><paramref name="toMixed" /> is false and the specified <paramref name="column" /> contains multiple types when converting from <see cref="String" />.</exception>
-		public static void ConvertFromString (this DataColumn column, bool toMixed) {
+		public static void ConvertFromString (this DataColumn column, bool toMixed)
+		{
 			if (! column.DataType.Equals(typeof(string)))
 				throw new ArgumentException("Column DataType is not String", "column");
 			
@@ -245,7 +248,8 @@ namespace HallLibrary.Extensions
 		/// <returns>The field separator used in the specified CSV file.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="path"/> is null or empty.</exception>
 		/// <exception cref="InvalidDataException">When it is unable to automatically determine the field separator.</exception>
-		public static string DetermineCSVSeparator (string path) {
+		public static string DetermineCSVSeparator (string path)
+		{
 			if (System.IO.Path.GetExtension(path).Equals(@".tsv", StringComparison.InvariantCultureIgnoreCase))
 				return "\t";
 			const int maxLinesToExamine = 3;
@@ -474,7 +478,8 @@ namespace HallLibrary.Extensions
 		/// </summary>
 		/// <param name="value">The <see cref="String" /> to attempt to convert.</param>
 		/// <returns>The <see cref="String" /> <paramref name="value" /> if not possible to convert, otherwise a <see cref="Decimal" />, <see cref="DateTime" /> or <see cref="Boolean" />.</returns>
-		public static object ConvertValueFromString(string value) {
+		public static object ConvertValueFromString(string value)
+		{
 			decimal valAsDecimal;
 			if (!(value.StartsWith(@"0") && value.Length > 1) // ignore it if it starts with 0
 				&& decimal.TryParse(value, out valAsDecimal)) // check if it is a valid number, use decimal as it keeps the formatting / precision
@@ -487,7 +492,8 @@ namespace HallLibrary.Extensions
 			return value;
 		}
 		
-		internal static string GetValueBase(object value, string nullSubstitution, string byteArrayPrefix, Func<string, string> escapeIfNecessary) {
+		internal static string GetValueBase(object value, string nullSubstitution, string byteArrayPrefix, Func<string, string> escapeIfNecessary)
+		{
 			if (value == null || value is DBNull)
 				return nullSubstitution;
 			
