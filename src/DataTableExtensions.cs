@@ -41,6 +41,7 @@ namespace HallLibrary.Extensions
 		/// Apply the given <paramref name="projection" /> to all values in a <paramref name="column" /> and replace it with a new column with the relevant datatype.
 		/// </summary>
 		/// <param name="column">The column to apply the <paramref name="projection" /> on.</param>
+		/// <param name="projection">The projection to apply to each value in the column.</param>
 		/// <param name="toMixed">If false, each value must be of the same type after projection.  If true, the column DataType becomes object.</param>
 		/// <exception cref="ArgumentNullException">The specified <paramref name="column" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentNullException">The <paramref name="projection" /> is <c>null</c>.</exception>
