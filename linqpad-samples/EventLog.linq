@@ -17,7 +17,7 @@ void Main(string[] args)
 		// TODO: read command line arguments
 	#else
 		// LINQPad GUI
-		try {
+		//try {
 			machine = Environment.MachineName;
 			//machine = GetInput("Machine", machine, value => !string.IsNullOrEmpty(value)); // default to this machine
 			since = DateTime.Now.AddDays(-1).Date; // default to since yesterday midnight
@@ -27,15 +27,16 @@ void Main(string[] args)
 			var datepicker = (DateTimePicker)prompt.AddCached("Since", since, newValue => since = newValue, value => value < DateTime.Now, "Date must be in the past");
 			datepicker.CustomFormat = ControlFactory.GetUniversalDateFormat();
 			datepicker.Format = DateTimePickerFormat.Custom;
-			if (prompt.Prompt() != DialogResult.OK)
+			if (prompt.Prompt() != DialogResult.OK) {
+				"Query Cancelled!".Dump();
 				return;
-			
+			}
 			if (string.IsNullOrEmpty(machine))
 				machine = "localhost";
-		} catch (InvalidDataException) {
+		/*} catch (InvalidDataException) {
 			"Query Cancelled!".Dump();
 			return;
-		}
+		}*/
 	#endif
 	
 	var conOpt = new ConnectionOptions();
