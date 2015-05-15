@@ -1,8 +1,10 @@
 <Query Kind="Program">
   <Output>DataGrids</Output>
+  <NuGetReference>HallLibrary.Extensions</NuGetReference>
   <Reference>&lt;RuntimeDirectory&gt;\System.Management.dll</Reference>
+  <Namespace>HallLibrary.Extensions</Namespace>
   <Namespace>System.Management</Namespace>
-  <Namespace>Microsoft.VisualBasic</Namespace>
+  <!--<Namespace>Microsoft.VisualBasic</Namespace>-->
 </Query>
 
 void Main(string[] args)
@@ -16,9 +18,20 @@ void Main(string[] args)
 	#else
 		// LINQPad GUI
 		try {
-			machine = GetInput("Machine", Environment.MachineName, value => !string.IsNullOrEmpty(value)); // default to this machine
+			machine = Environment.MachineName;
+			//machine = GetInput("Machine", machine, value => !string.IsNullOrEmpty(value)); // default to this machine
 			since = DateTime.Now.AddDays(-1).Date; // default to since yesterday midnight
-			GetInput("Since", since.ToString(), value => DateTime.TryParse(value, out since));
+			//GetInput("Since", since.ToString(), value => DateTime.TryParse(value, out since));
+			var prompt = new InteractivePrompt();
+			prompt.AddCached("Machine", machine, newValue => machine = newValue);
+			var datepicker = (DateTimePicker)prompt.AddCached("Since", since, newValue => since = newValue, value => value < DateTime.Now, "Date must be in the past");
+			datepicker.CustomFormat = ControlFactory.GetUniversalDateFormat();
+			datepicker.Format = DateTimePickerFormat.Custom;
+			if (prompt.Prompt() != DialogResult.OK)
+				return;
+			
+			if (string.IsNullOrEmpty(machine))
+				machine = "localhost";
 		} catch (InvalidDataException) {
 			"Query Cancelled!".Dump();
 			return;
@@ -50,7 +63,7 @@ void Main(string[] args)
 		}).Dump();
 	}
 }
-
+/*
 // Define other methods and classes here
 public static string GetInput (string question, string defaultValue, Func<string, bool> validate = null) {
 	var cached = AppDomain.CurrentDomain.GetData(question);
@@ -63,3 +76,4 @@ public static string GetInput (string question, string defaultValue, Func<string
 	
 	return value;
 }
+*/
