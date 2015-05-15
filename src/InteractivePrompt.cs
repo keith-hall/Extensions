@@ -133,7 +133,7 @@ namespace HallLibrary.Extensions
 		}
 	}
 		
-	static class ControlFactory
+	public static class ControlFactory
 	{
 		public static Control CreateControl<T>(T item)
 		{
