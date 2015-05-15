@@ -4,6 +4,7 @@
   <Reference>&lt;RuntimeDirectory&gt;\System.Management.dll</Reference>
   <Namespace>HallLibrary.Extensions</Namespace>
   <Namespace>System.Management</Namespace>
+  <Namespace>System.Windows.Forms</Namespace>
   <!--<Namespace>Microsoft.VisualBasic</Namespace>-->
 </Query>
 
