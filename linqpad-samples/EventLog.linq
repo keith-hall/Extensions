@@ -18,26 +18,20 @@ void Main(string[] args)
 		// TODO: read command line arguments
 	#else
 		// LINQPad GUI
-		//try {
-			machine = Environment.MachineName;
-			//machine = GetInput("Machine", machine, value => !string.IsNullOrEmpty(value)); // default to this machine
-			since = DateTime.Now.AddDays(-1).Date; // default to since yesterday midnight
-			//GetInput("Since", since.ToString(), value => DateTime.TryParse(value, out since));
-			var prompt = new InteractivePrompt();
-			prompt.AddCached("Machine", machine, newValue => machine = newValue);
-			var datepicker = (DateTimePicker)prompt.AddCached("Since", since, newValue => since = newValue, value => value < DateTime.Now, "Date must be in the past");
-			datepicker.CustomFormat = ControlFactory.GetUniversalDateFormat();
-			datepicker.Format = DateTimePickerFormat.Custom;
-			if (prompt.Prompt() != DialogResult.OK) {
-				"Query Cancelled!".Dump();
-				return;
-			}
-			if (string.IsNullOrEmpty(machine))
-				machine = "localhost";
-		/*} catch (InvalidDataException) {
+		machine = Environment.MachineName;
+		since = DateTime.Now.AddDays(-1).Date; // default to since yesterday midnight
+		var prompt = new InteractivePrompt();
+		prompt.AddCached("Machine", machine, newValue => machine = newValue);
+		var datepicker = (DateTimePicker)prompt.AddCached("Since", since, newValue => since = newValue);
+		datepicker.CustomFormat = ControlFactory.GetUniversalDateFormat();
+		datepicker.Format = DateTimePickerFormat.Custom;
+		datepicker.MaxDate = DateTime.Now;
+		if (prompt.Prompt() != DialogResult.OK) {
 			"Query Cancelled!".Dump();
 			return;
-		}*/
+		}
+		if (string.IsNullOrEmpty(machine))
+			machine = "localhost";
 	#endif
 	
 	var conOpt = new ConnectionOptions();
@@ -50,7 +44,7 @@ void Main(string[] args)
 	
 	if (scope.IsConnected)
 	{
-		var query = new SelectQuery("Select * from Win32_NTLogEvent Where Logfile = 'Application' and TimeGenerated >='" + ManagementDateTimeConverter.ToDmtfDateTime(since) + "'");
+		var query = new SelectQuery("Select * From Win32_NTLogEvent Where Logfile = 'Application' and TimeGenerated >= '" + ManagementDateTimeConverter.ToDmtfDateTime(since) + "'");
 		var searcher = new ManagementObjectSearcher(scope, query);
 		var logs = searcher.Get().OfType<ManagementObject>();
 		
