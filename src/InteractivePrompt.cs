@@ -3,6 +3,10 @@ using System.Drawing;
 
 namespace HallLibrary.Extensions
 {
+	/// <summary>
+	/// A class used to build a simple input form at runtime, with optional validation.
+	/// Can cache inputs to current app domain, useful for when running code in LINQPad.
+	/// </summary>
 	public class InteractivePrompt
 	{
 		private TableLayoutPanel layout = new TableLayoutPanel { ColumnCount = 2, Dock = DockStyle.Fill, Padding = new Padding(3) };
