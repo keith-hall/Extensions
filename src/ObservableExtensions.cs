@@ -22,5 +22,19 @@ namespace HallLibrary.Extensions
 				(previous, current) => Tuple.Create(previous.Item2, current))
 				.Select(t => projection(t.Item1, t.Item2));
 		}
+		
+		/// <summary>
+		/// Ensure that the subscription to the <paramref name="observable" /> is re-subscribed to on error.
+		/// </summary>
+		/// <typeparam name="T">The type of data the observable contains.</typeparam>
+		/// <param name="observable">The observable to re-subscribe to on error.</param>
+		/// <param name="onNext">Action to invoke for each element in the <paramref name="observable" /> sequence.</param>
+		/// <param name="onError">Action to invoke for each error that occurs in the <paramref name="observable" /> sequence.</param>
+		public static void ReSubscribeOnError<T> (this IObservable<T> observable, Action<T> onNext, Action<Exception> onError = null)
+		{
+			Action sub = null;
+			sub = () => observable.Subscribe(onNext, ex => { if (onError != null) onError(ex); sub(); });
+			sub();
+		}
 	}
 }
