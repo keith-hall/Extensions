@@ -30,10 +30,12 @@ namespace HallLibrary.Extensions
 		/// <param name="observable">The observable to re-subscribe to on error.</param>
 		/// <param name="onNext">Action to invoke for each element in the <paramref name="observable" /> sequence.</param>
 		/// <param name="onError">Action to invoke for each error that occurs in the <paramref name="observable" /> sequence.</param>
-		public static void ReSubscribeOnError<T> (this IObservable<T> observable, Action<T> onNext, Action<Exception> onError = null)
+		/// <param name="delayAfterError">The time to wait after an error before re-subscribing to the <paramref name="observable" /> sequence.</param>
+		/// <remarks>http://stackoverflow.com/questions/18978523/write-an-rx-retryafter-extension-method</remarks>
+		public static void ReSubscribeOnError<T> (this IObservable<T> observable, Action<T> onNext, Action<Exception> onError, TimeSpan delayAfterError)
 		{
 			Action sub = null;
-			sub = () => observable.Subscribe(onNext, ex => { if (onError != null) onError(ex); sub(); });
+			sub = () => observable.Subscribe(onNext, ex => { onError(ex); observable = observable.DelaySubscription(delayAfterError); sub(); });
 			sub();
 		}
 	}
