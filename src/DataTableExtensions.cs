@@ -313,8 +313,11 @@ namespace HallLibrary.Extensions
 			const string quote = "\"";
 			return ToOrFromString.GetValueBase(value, string.Empty, string.Empty, s => {
 				s = s.Replace(Environment.NewLine, " ").Replace("\r", " ").Replace("\n", " "); // remove line breaks, replace with spaces
-				s = s.Replace(quote, @"\" + quote); // replace quotes with a backslash and then a quote
-				return s.IndexOf(separator, StringComparison.InvariantCultureIgnoreCase) > -1 ? (quote + s + quote) : s;
+				
+				// the following text qualification rules and quote doubling are based on recommendations in RFC 4180
+				var qualify = s.Contains(quote) || s.EndsWith(" ") || s.EndsWith("\t") || (s.IndexOf(separator, StringComparison.InvariantCultureIgnoreCase) > -1); // qualify the text in quotes if it contains a quote, ends in whitespace, or contains the separator
+				
+				return qualify ? (quote + s.Replace(quote, quote + quote) + quote) : s; // to escape a quote, we double it up
 			});
 		}
 		
