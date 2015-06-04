@@ -288,9 +288,20 @@ namespace HallLibrary.Extensions
 			if (! iterator.MoveNext())
 				return dt;
 			
+			var columnCounts = new Dictionary<string, int>();
 			foreach (var header in iterator.Current)
-				dt.Columns.Add(containsHeaders ? header : string.Empty);
-			
+			{
+				if (containsHeaders)
+				{
+					if (!columnCounts.ContainsKey(header))
+						columnCounts.Add(header, 1);
+					else
+						++columnCounts[header];
+					dt.Columns.Add(header + (columnCounts[header] == 1 ? string.Empty : columnCounts[header].ToString()));
+				}
+				else
+					dt.Columns.Add(string.Empty);
+			}
 			if (containsHeaders && !iterator.MoveNext())
 				return dt;
 			
