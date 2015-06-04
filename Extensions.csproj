@@ -63,6 +63,7 @@
     <Compile Include="src\DataTableExtensions.cs" />
     <Compile Include="src\DateTimeExtensions.cs" />
     <Compile Include="src\EnumerableExtensions.cs" />
+    <Compile Include="src\QueryableExtensions.cs" />
     <Compile Include="src\HttpPoller.cs" />
     <Compile Include="src\JoinExtensions.cs" />
     <Compile Include="src\ObservableExtensions.cs" />
