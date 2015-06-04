@@ -29,12 +29,14 @@ namespace HallLibrary.Extensions
 		#region Conversion
 		public static void ConvertColumnsFromString (this DataTable dt, bool toMixed)
 		{
-			Parallel.ForEach(dt.Columns.OfType<DataColumn>().Where(col => col.DataType == typeof(string)).ToList(), col => {
+			//Parallel.ForEach(dt.Columns.OfType<DataColumn>().Where(col => col.DataType == typeof(string)).ToList(), col => {
+			foreach (var col in dt.Columns.OfType<DataColumn>().Where(col => col.DataType == typeof(string)).ToList()) {
 				try {
 					dt.Columns[col.ColumnName].ConvertFromString(toMixed);
 				} catch (InvalidOperationException) {
 				}
-			});
+			}
+			//});
 		}
 		
 		/// <summary>
