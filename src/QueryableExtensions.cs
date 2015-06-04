@@ -10,7 +10,7 @@ namespace HallLibrary.Extensions
 	public static class QueryableExtensions
 	{
 		/// <summary>
-		/// Returns a single value from the specified <paramref name="queryable"/>, or throws an Exception if it contains multiple values.
+		/// Returns a single value from the specified <paramref name="queryable"/>, or throws an Exception if it contains no or multiple values.
 		/// </summary>
 		/// <typeparam name="T">The type of elements in the queryable.</typeparam>
 		/// <param name="queryable">The queryable sequence to get the single value of.</param>
