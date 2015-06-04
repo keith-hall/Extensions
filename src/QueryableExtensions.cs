@@ -16,6 +16,7 @@ namespace HallLibrary.Extensions
 		/// <param name="queryable">The queryable sequence to get the single value of.</param>
 		/// <returns>Returns the single value from the specified <paramref name="queryable"/>, using the most efficient method possible to determine that it is a single value.</returns>
 		/// <remarks>More efficient than the built in LINQ to SQL "Single" method, because this one takes the minimum number of results necessary to determine if the queryable contains a single value or not.</remarks>
+		/// <exception cref="InvalidOperationException"><paramref name="queryable" /> contains 0 or more than 1 element.</exception>
 		public static T EnsureSingle<T>(this IQueryable<T> queryable)
 		{
 			return queryable.Take(2).Single();
