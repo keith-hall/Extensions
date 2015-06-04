@@ -19,6 +19,7 @@ namespace HallLibrary.Extensions
 		/// <exception cref="InvalidOperationException"><paramref name="queryable" /> contains 0 or more than 1 element.</exception>
 		public static T EnsureSingle<T>(this IQueryable<T> queryable)
 		{
+			// note that this is possible because if only one element exists, the Take will only return 1, and by only taking a maximum of 2 elements, we are not unnecessarily extracting more data than we need from the queryable.
 			return queryable.Take(2).Single();
 		}
 	}
