@@ -27,17 +27,17 @@ namespace HallLibrary.Extensions
 		#endregion
 		
 		#region DataRowCollection Extensions
-		public static object GetValuesInColumn (this DataRowCollection rows, DataColumn col)
+		public static IEnumerable<object> GetValuesInColumn (this DataRowCollection rows, DataColumn col)
 		{
 			return rows.OfType<DataRow>().Select(dr => dr[col]);
 		}
 		
-		public static object GetValuesInColumn (this DataRowCollection rows, string columnName)
+		public static IEnumerable<object> GetValuesInColumn (this DataRowCollection rows, string columnName)
 		{
 			return rows.OfType<DataRow>().Select(dr => dr[columnName]);
 		}
 		
-		public static object GetValuesInColumn (this DataRowCollection rows, int columnOrdinal)
+		public static IEnumerable<object> GetValuesInColumn (this DataRowCollection rows, int columnOrdinal)
 		{
 			return rows.OfType<DataRow>().Select(dr => dr[columnOrdinal]);
 		}
