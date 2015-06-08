@@ -327,6 +327,11 @@ namespace HallLibrary.Extensions
 			dt.BeginLoadData();
 			
 			do {
+				// cope with invalid CSV files that contain more fields in some rows than there are columns defined
+				for (int x = dt.Columns.Count; x < iterator.Current.Length; x++)
+					dt.Columns.Add();
+				
+				// add the row to the data table
 				dt.Rows.Add(iterator.Current);
 			} while (iterator.MoveNext());
 			
