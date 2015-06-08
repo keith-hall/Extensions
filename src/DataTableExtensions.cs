@@ -15,10 +15,10 @@ namespace HallLibrary.Extensions
 	public static class DataTableExtensions
 	{
 		#region CSV
-		public static void WriteToCSV(this DataTable table, TextWriter writer, string separator = "\t")
+		public static void WriteToCSV(this DataTable table, TextWriter writer, string separator = "\t", bool includeColumnNamesAsHeader = true)
 		{
 			CSV.Write(
-				table.Columns.OfType<DataColumn>().Select(c => c.Caption),
+				includeColumnNamesAsHeader ? table.Columns.OfType<DataColumn>().Select(c => c.Caption) : null,
 				table.Rows.OfType<DataRow>().Select(row => row.ItemArray),
 				writer,
 				separator
