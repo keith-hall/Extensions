@@ -26,6 +26,23 @@ namespace HallLibrary.Extensions
 		}
 		#endregion
 		
+		#region DataRowCollection Extensions
+		public static object GetValuesInColumn (this DataRowCollection rows, DataColumn col)
+		{
+			return rows.OfType<DataRow>().Select(dr => dr[col]);
+		}
+		
+		public static object GetValuesInColumn (this DataRowCollection rows, string columnName)
+		{
+			return rows.OfType<DataRow>().Select(dr => dr[columnName]);
+		}
+		
+		public static object GetValuesInColumn (this DataRowCollection rows, int columnOrdinal)
+		{
+			return rows.OfType<DataRow>().Select(dr => dr[columnOrdinal]);
+		}
+		#endregion
+		
 		#region Conversion
 		public static void ConvertColumnsFromString (this DataTable dt, bool toMixed)
 		{
@@ -50,7 +67,7 @@ namespace HallLibrary.Extensions
 		/// <exception cref="InvalidOperationException"><paramref name="toMixed" /> is false and the specified <paramref name="column" /> contains multiple types after <paramref name="projection" />.</exception>
 		public static void Convert (this DataColumn column, Func<object, object> projection, bool toMixed)
 		{
-			var cells = column.Table.Rows.OfType<DataRow>().Select(row => projection(row[column]));
+			var cells = column.Table.Rows.GetValuesInColumn(column).Select(projection);
 			var items = new List<object>(column.Table.Rows.Count);
 			Type newType = null;
 			foreach (var cell in cells) {
