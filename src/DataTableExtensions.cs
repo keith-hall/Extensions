@@ -297,8 +297,10 @@ namespace HallLibrary.Extensions
 		/// <param name="separator">The field separator used in the CSV file.</param>
 		/// <param name="containsHeaders">Specifies whether the CSV file contains a header row or not, which will be used to set the DataTable column headings.</param>
 		/// <param name="inferTypes">Specifies whether to attempt to determine the type of each column based on it's contents.  Supports dates and numbers.</param>
+		/// <param name="tolerateMalformedFile">Specifies whether to continue loading a file when some lines are malformed and contain too many fields.</param>
 		/// <returns>A <see cref="System.Data.DataTable"/> representing the contents of the CSV file.</returns>
-		public static DataTable Load(string path, string separator = null, bool containsHeaders = true, bool inferTypes = false)
+		/// <exception cref="InvalidDataException">A line in the file is malformed and contains too many fields.</exception>
+		public static DataTable Load(string path, string separator = null, bool containsHeaders = true, bool inferTypes = false, bool tolerateMalformedFile = false)
 		{
 			var csv = OpenCSV(path, separator);
 			var dt = new DataTable(path);
@@ -325,11 +327,15 @@ namespace HallLibrary.Extensions
 				return dt;
 			
 			dt.BeginLoadData();
-			
+			ulong lineNo = 0;
 			do {
-				// cope with invalid CSV files that contain more fields in some rows than there are columns defined
-				for (int x = dt.Columns.Count; x < iterator.Current.Length; x++)
-					dt.Columns.Add();
+				lineNo ++;
+				if (tolerateMalformedFile) {
+					// cope with invalid CSV files that contain more fields in some rows than there are columns defined
+					for (int x = dt.Columns.Count; x < iterator.Current.Length; x++)
+						dt.Columns.Add();
+				} else if (dt.Columns.Count < iterator.Current.Length)
+					throw new InvalidDataException(string.Format(@"Malformed line {0} in CSV '{1}' with separator '{2}'", lineNo, path, separator));
 				
 				// add the row to the data table
 				dt.Rows.Add(iterator.Current);
