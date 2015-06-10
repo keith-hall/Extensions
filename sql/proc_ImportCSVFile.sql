@@ -49,23 +49,29 @@ DECLARE @Schema SYSNAME = 'dbo'
 DECLARE @FullTableName SYSNAME = @Database + '.' + @Schema + '.' + @TableName
 DECLARE @UseTableName SYSNAME = CASE WHEN @Database = 'TempDB' THEN @TableName ELSE @FullTableName END
 DECLARE @FieldType VARCHAR(20) = 'NVARCHAR(450)'
+DECLARE @Message NVARCHAR(2000)
 
 SET NOCOUNT ON
 
 -- if the table exists, drop it
 IF OBJECT_ID(@FullTableName) IS NOT NULL
 BEGIN
+	SET @Message = 'Table ' + @FullTableName + ' exists, dropping...'
 	IF @DebugMessages = 1
-		PRINT 'Table ' + @FullTableName + ' exists, dropping...'
+		RAISERROR (@Message, 0, 1) WITH NOWAIT
+	
 	SET @SQL = 'DROP TABLE ' + @UseTableName
 	EXEC (@SQL)
+	
+	SET @Message = 'Table ' + @FullTableName + ' dropped.'
 	IF @DebugMessages = 1
-		PRINT 'Table ' + @FullTableName + ' dropped.'
+		RAISERROR (@Message, 0, 1) WITH NOWAIT
 END
 
+SET @Message = 'Reading first line of file to get ' + CASE WHEN @FileContainsHeader = 1 AND @IgnoreFileHeader = 0 THEN 'header' ELSE 'number of fields' END + '...'
 IF @DebugMessages = 1
-	PRINT 'Reading first line of file to get ' + CASE WHEN @FileContainsHeader = 1 AND @IgnoreFileHeader = 0 THEN 'header' ELSE 'number of fields' END + '...'
-		
+	RAISERROR (@Message, 0, 1) WITH NOWAIT
+
 -- import the first line from the file
 CREATE TABLE #Header (Line VARCHAR(MAX))
 
@@ -79,7 +85,8 @@ WITH (
 	LASTROW         = 1,
 	FIELDTERMINATOR = ''\n'',
 	ROWTERMINATOR   = ''\n'',
-	CODEPAGE        = ''1257''
+	CODEPAGE        = ''1257'',
+	TABLOCK
 )'
 EXEC (@SQL)
 
@@ -113,12 +120,21 @@ DROP TABLE #Header
 IF @DebugMessages = 1
 BEGIN
 	IF @IgnoreFileHeader = 1
-		PRINT 'Header skipped from file, using as provided: ' + @Header
+	BEGIN
+		SET @Message = 'Header skipped from file, using as provided: ' + @Header
+		RAISERROR (@Message, 0, 1) WITH NOWAIT
+	END
 	ELSE IF @FileContainsHeader = 1
-		PRINT 'Header retrieved from file: ' + @Header
+	BEGIN
+		SET @Message = 'Header retrieved from file: ' + @Header
+		RAISERROR (@Message, 0, 1) WITH NOWAIT
+	END
 	
 	IF @FileContainsHeader = 0 OR @IgnoreFileHeader = 1
-		PRINT 'Field counts in first row of file match header.'
+	BEGIN
+		SET @Message =  'Field counts in first row of file match header.'
+		RAISERROR (@Message, 0, 1) WITH NOWAIT
+	END
 END
 
 -- read the columns from the header and add these to the table
@@ -150,18 +166,20 @@ END
 
 SET @SQL = 'CREATE TABLE ' + @UseTableName + ' (' + @SQL + ')'
 IF @DebugMessages = 1
-	PRINT 'Creating table ' + @FullTableName + '...
+BEGIN
+	SET @Message = 'Creating table ' + @FullTableName + '...
 	' + @SQL
-
+	RAISERROR (@Message, 0, 1) WITH NOWAIT
+END
 EXEC (@SQL)
 
+SET @Message = 'Table ' + @FullTableName + ' created successfully.'
 IF @DebugMessages = 1
-	PRINT 'Table ' + @FullTableName + ' created successfully.'
+	RAISERROR (@Message, 0, 1) WITH NOWAIT
 
+SET @Message = 'Importing data from file...'
 IF @DebugMessages = 1
-BEGIN
-	PRINT 'Importing data from file...'
-END
+	RAISERROR (@Message, 0, 1) WITH NOWAIT
 
 SET NOCOUNT OFF
 
@@ -181,25 +199,30 @@ WITH (
 )'
 EXEC (@SQL)
 
+SET @Message = 'Data imported from file.'
 IF @DebugMessages = 1
-	PRINT 'Data imported from file.'
+	RAISERROR (@Message, 0, 1) WITH NOWAIT
 
 IF ISNULL(@ExtraColumns, '') != ''
 BEGIN
+	SET @Message = 'Adding extra columns specified...'
 	IF @DebugMessages = 1
-		PRINT 'Adding extra columns specified...'
-	
+		RAISERROR (@Message, 0, 1) WITH NOWAIT
+
 	SET @SQL = 'ALTER TABLE ' + @UseTableName + ' ADD /*LineNumber INT IDENTITY(1, 1),*/ ' + @ExtraColumns -- commented out adding line number because doesn't seem to work as expected to use original order from file
 	EXEC (@SQL)
 	
+	SET @Message = 'Table altered to include extra fields.'
 	IF @DebugMessages = 1
-		PRINT 'Table altered to include extra fields.'
+		RAISERROR (@Message, 0, 1) WITH NOWAIT
 END
 
 SET NOCOUNT OFF
 IF @existingTranCount = 0
 	COMMIT TRANSACTION
 
+SET @Message = 'End of stored procedure proc_ImportCSVFile.'
 IF @DebugMessages = 1
-	PRINT 'End of stored procedure proc_ImportCSVFile.'
+	RAISERROR (@Message, 0, 1) WITH NOWAIT
+
 RETURN 0
