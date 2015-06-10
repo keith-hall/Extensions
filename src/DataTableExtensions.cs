@@ -37,6 +37,7 @@ namespace HallLibrary.Extensions
 			return rows.OfType<DataRow>().Select(dr => dr[columnName]);
 		}
 		
+		// could return data from an unexpected column if the data table's columns are modified...
 		public static IEnumerable<object> GetValuesInColumn (this DataRowCollection rows, int columnOrdinal)
 		{
 			return rows.OfType<DataRow>().Select(dr => dr[columnOrdinal]);
