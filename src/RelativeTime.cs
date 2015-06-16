@@ -9,8 +9,8 @@ namespace HallLibrary.Extensions
 		public static string GetRelativeTime (DateTime baseDate, bool includeWeeks = true) {
 			var relative = GetRelativeTimeComponents(baseDate, includeWeeks).ToList();
 			var future = relative.Any(v => v.Value < 0);
-			if (relative.TakeWhile(v => v.Key != IntervalType.Day).All(v => v.Value == 0) && relative.Any(v => v.Key == IntervalType.Day && Math.Abs(v.Value) == 1)) // exactly one day (no weeks/months/years), time is allowed // TODO: check is the next/previous day and not taken over to the one after/before by the time component...
-				return string.Format(future ? "Tomorrow at {0}" : "Yesterday at {0}", baseDate.ToShortTimeString());
+			//if (relative.TakeWhile(v => v.Key != IntervalType.Day).All(v => v.Value == 0) && relative.Any(v => v.Key == IntervalType.Day && Math.Abs(v.Value) == 1)) // exactly one day (no weeks/months/years), time is allowed // TODO: check is the next/previous day and not taken over to the one after/before by the time component...
+			//	return string.Format(future ? "Tomorrow at {0}" : "Yesterday at {0}", baseDate.ToShortTimeString());
 			return (future ? "in " : string.Empty) + string.Join(" and ", relative.SkipWhile(r => r.Value == 0).Take(2).Where(r => r.Value != 0).Select(r => string.Format("{0} {1}{2}", Math.Abs(r.Value), r.Key.ToString().ToLower(), Math.Abs(r.Value) == 1 ? string.Empty : "s"))) + (future ? string.Empty : " ago");
 		}
 		
