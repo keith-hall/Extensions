@@ -9,8 +9,8 @@ namespace HallLibrary.Extensions
 		public static string GetRelativeTime (DateTime baseDate, bool includeWeeks = true) {
 			var relative = GetRelativeTimeComponents(baseDate, includeWeeks).ToList();
 			var future = relative.Any(v => v.Value < 0);
-			if (relative.TrueForAll(v => v.Value == 0 || (v.Key == IntervalType.Day && Math.Abs(v.Value) == 1)))
-				return future ? "Tomorrow" : "Yesterday";
+			if (relative.TrueForAll(v => v.Value == 0 || (v.Key == IntervalType.Day && Math.Abs(v.Value) == 1))) // TODO: only check date, not time for equality...
+				return string.Format(future ? "Tomorrow at {0}" : "Yesterday at {0}", baseDate.ToShortTimeString());
 			return (future ? "in " : string.Empty) + string.Join(" and ", relative.SkipWhile(r => r.Value == 0).Take(2).Where(r => r.Value != 0).Select(r => string.Format("{0} {1}{2}", Math.Abs(r.Value), r.Key.ToString().ToLower(), Math.Abs(r.Value) == 1 ? string.Empty : "s"))) + (future ? string.Empty : " ago");
 		}
 		
