@@ -7,6 +7,7 @@ namespace HallLibrary.Extensions
 	public static class RelativeTime
 	{
 		public static string GetRelativeTime (DateTime baseDate, bool includeWeeks = true) {
+			// TODO: ensure time is in the user's timezone
 			if (baseDate.Date.AddDays(1) == DateTime.Today)
 				return string.Format("Yesterday at {0}", baseDate.ToShortTimeString());
 			if (baseDate.Date.AddDays(-1) == DateTime.Today)
@@ -18,7 +19,8 @@ namespace HallLibrary.Extensions
 		}
 		
 		public static IEnumerable<KeyValuePair<IntervalType, long>> GetRelativeTimeComponents (DateTime baseDate, bool includeWeeks) {
-			DateTime relativeToDate = DateTime.Now;
+			DateTime relativeToDate = DateTime.UtcNow;
+			baseDate = baseDate.ToUniversalTime();
 			bool future;
 			if (future = baseDate > relativeToDate) {
 				var tmp = relativeToDate;
