@@ -551,7 +551,7 @@ namespace HallLibrary.Extensions
 			if (value is bool)
 				return toBoolString((bool)value);
 			if (value is Byte[])
-				return escapeIfNecessary(byteArrayPrefix ?? string.Empty + (new SoapHexBinary(value as Byte[]).ToString()));
+				return escapeIfNecessary((byteArrayPrefix ?? string.Empty) + (new SoapHexBinary(value as Byte[]).ToString()));
 			if (value is string)
 				return escapeIfNecessary((string)value);
 			
@@ -562,7 +562,7 @@ namespace HallLibrary.Extensions
 		public static string GetValueForSQL(object value)
 		{
 			return GetValueBase(value, @"null", @"0x", s => {
-				if (value is decimal || value is int || value is long || value is float || value is bool) // if it is a numeric type, no need to escape it
+				if (value is decimal || value is int || value is long || value is float || value is bool || value is Byte[]) // if it is a numeric type or a varbinary, no need to escape it
 					return s;
 				else
 					return @"'" + s.Replace(@"'", @"''") + @"'"; // escape the value
