@@ -208,7 +208,7 @@ namespace HallLibrary.Extensions
 		
 		/// <summary>
 		/// Returns a friendly label from the supplied name. For example, the
-		/// string "firstName" would be returned as "First Name".
+		/// string "firstName" would be returned as "First Name".  "importantID" would become "Important ID".
 		/// </summary>
 		/// <param name="text"></param>
 		/// <returns></returns>
@@ -216,9 +216,11 @@ namespace HallLibrary.Extensions
 		{
 			if (text.Contains(" "))
 				return text;
-			return String.Join(string.Empty, text.AsEnumerable().Select(
+			/*return String.Join(string.Empty, text.AsEnumerable().Select(
 				(c, i) => ((Char.IsUpper(c) || i == 0) ? " " + Char.ToUpper(c).ToString() : c.ToString())
-			)).Trim();
+			)).Trim();*/
+			var converted = new Regex("([a-z]+)([A-Z])").Replace(fieldName, m => m.Groups[1].Value + " " + m.Groups[2].Value).Trim();
+			return converted.Substring(0, 1).ToUpperInvariant() + converted.Substring(1);
 		}
 	}
 }
