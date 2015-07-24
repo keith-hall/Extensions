@@ -220,7 +220,7 @@ namespace HallLibrary.Extensions
 			/*return String.Join(string.Empty, text.AsEnumerable().Select(
 				(c, i) => ((Char.IsUpper(c) || i == 0) ? " " + Char.ToUpper(c).ToString() : c.ToString())
 			)).Trim();*/
-			var converted = new Regex("([a-z]+)([A-Z])").Replace(fieldName, m => m.Groups[1].Value + " " + m.Groups[2].Value).Trim();
+			var converted = new Regex("([a-z]+)([A-Z])").Replace(text, m => m.Groups[1].Value + " " + m.Groups[2].Value).Trim();
 			return converted.Substring(0, 1).ToUpperInvariant() + converted.Substring(1);
 		}
 	}
