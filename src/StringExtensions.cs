@@ -191,5 +191,19 @@ namespace HallLibrary.Extensions
 			}
 		}
 		#endregion
+		/*
+		#region SGML
+		public static string SGMLEscapeNonAsciiChars (this string toEscape)
+		{
+			return Regex.Replace(toEscape, @"[^\u0000-\u007F]", m => "&#" + ((int)(Convert.ToChar(m.Groups[0].Value))).ToString() + ";");
+		}
+
+		// alternative is to use System.Web.HttpUtility.HtmlEncode
+		public static string MakeSGMLSafe(this string toEscape)
+		{
+			return SGMLEscapeNonAsciiChars(System.Security.SecurityElement.Escape(toEscape));
+		}
+		#endregion
+		*/
 	}
 }
