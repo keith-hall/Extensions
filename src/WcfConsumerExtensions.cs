@@ -32,31 +32,52 @@ namespace HallLibrary.Extensions {
 	}
 	
 	public static class TraceHelper {
-		public static IEnumerable<XElement> ElementsAnyNS<T>(this T source, string localName)
+		public static IEnumerable<XElement> GetElementsByName<T>(this T source, string name, bool ignoreNamespace = false)
 			where T : XContainer
 		{
-			return source.Elements().Where(e => e.Name.LocalName == localName);
+			var names = name.Split(':');
+			if (names.Length > 2)
+				throw new ArgumentException(nameof(name));
+			if (names.Length == 1)
+				names = Enumerable.Repeat((string)null, 1).Concat(names).ToArray();
+			
+			Func<XElement, bool> where = xe => xe.Name.LocalName == names[1] && (ignoreNamespace || Object.Equals(xe.GetPrefixOfNamespace(xe.Name.NamespaceName), names[0]));
+			return source.Elements().Where(where);
 		}
-		
-		public static XElement ElementAnyNS<T>(this T source, string localName)
+	
+		public static XElement GetElementByName<T>(this T source, string name, bool ignoreNamespace = false)
 			where T : XContainer
 		{
-			return source.ElementsAnyNS(localName).FirstOrDefault();
+			return source.GetElementsByName(name, ignoreNamespace).FirstOrDefault();
 		}
-		
+	
+		public static IEnumerable<XElement> GetElementsByNameAndNamespace<T>(this T source, string localName, string namespaceURI)
+			where T : XContainer
+		{
+			Func<string, string> ensureEndsInSlash = s => s.EndsWith("/") ? s : (s + "/");
+			Func<XElement, bool> where = xe => xe.Name.LocalName == localName && ensureEndsInSlash(xe.Name.NamespaceName).Dump().Equals(namespaceURI.Dump()).Dump();
+			
+			namespaceURI = ensureEndsInSlash(namespaceURI);
+			return source.Elements().Where(where);
+		}
+	
+		public static XElement GetElementByNameAndNamespace<T>(this T source, string localName, string namespaceURI)
+			where T : XContainer
+		{
+			return source.GetElementsByNameAndNamespace(localName, namespaceURI).FirstOrDefault();
+		}
+	
 		public static XAttribute AttributeAnyNS<T>(this T source, string localName)
 			where T : XElement
 		{
 			return source.Attributes().FirstOrDefault(a => a.Name.LocalName == localName);
 		}
-		
-		public static IEnumerable<TraceData> ReadTracesFromFile (string path)
+	
+		public static IEnumerable<TraceData> ReadTracesFromFile(string path)
 		{
-			// .svclog
 			var xr = XmlTextReader.Create(path, new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment });
-			//var lastWord = new Regex(@"[A-Z][a-z]+$");
 			var skipMessageTypes = new[] { "System.ServiceModel.Channels.NullMessage", "System.ServiceModel.Description.ServiceMetadataExtension+HttpGetImpl+MetadataOnHelpPageMessage" };
-			var skipActions = new[] { "http://tempuri.org/IConnectionRegister/",  "http://schemas.xmlsoap.org/" };
+			var skipActions = new[] { "http://tempuri.org/IConnectionRegister/", "http://schemas.xmlsoap.org/" };
 			
 			xr.Read();
 			do {
@@ -65,11 +86,11 @@ namespace HallLibrary.Extensions {
 					
 					var traceData = new TraceData();
 					
-					var system = xd.ElementAnyNS("System");
-					traceData.TimeCreated = DateTime.Parse(system.ElementAnyNS("TimeCreated").AttributeAnyNS("SystemTime").Value);
-					traceData.Computer = system.ElementAnyNS("Computer").Value;
+					var system = xd.GetElementByName("System");
+					traceData.TimeCreated = DateTime.Parse(system.GetElementByName("TimeCreated").AttributeAnyNS("SystemTime").Value);
+					traceData.Computer = system.GetElementByName("Computer").Value;
 					
-					var messageLog = xd.ElementAnyNS("ApplicationData").ElementAnyNS("TraceData").ElementAnyNS("DataItem").ElementAnyNS("MessageLogTraceRecord");
+					var messageLog = xd.GetElementByName("ApplicationData").GetElementByName("TraceData").GetElementByName("DataItem").GetElementByName("MessageLogTraceRecord");
 					traceData.MessageType = messageLog.AttributeAnyNS("Type").Value;
 					if (skipMessageTypes.Contains(traceData.MessageType))
 						continue;
@@ -77,30 +98,28 @@ namespace HallLibrary.Extensions {
 					var source = messageLog.AttributeAnyNS("Source").Value;
 					
 					traceData.Source = source;
-					
-					var soapEnvelope = messageLog.ElementAnyNS("Envelope");
+	
+					var soapEnvelope = messageLog.GetElementByName("Envelope", true);
 					if (soapEnvelope == null)
 					{
 						messageLog.Dump();
 					}
 					else
 					{
-						var header = soapEnvelope.ElementAnyNS("Header");
+						var header = soapEnvelope.GetElementByName("Header", true);
 						if (header == null)
 						{
-							traceData.Action = messageLog.ElementAnyNS("Addressing")?.ElementAnyNS("Action").Value;
+							traceData.Action = messageLog.GetElementByName("Addressing")?.GetElementByName("Action").Value;
 						}
 						else
 						{
-							traceData.Action = header.ElementAnyNS("Action")?.Value;
-	
-							traceData.Address = header.ElementAnyNS("To")?.Value;
+							traceData.Action = header.GetElementByName("Action", true)?.Value;
+							traceData.Address = header.GetElementByName("To", true)?.Value;
 						}
-	
-						traceData.Content = soapEnvelope.ElementAnyNS("Body").Elements().FirstOrDefault();
+						traceData.Content = soapEnvelope.GetElementByName("Body", true).Elements().FirstOrDefault();
 					}
 					
-					if (skipActions.Any(traceData.Action.StartsWith))
+					if (traceData.Action != null && skipActions.Any(traceData.Action.StartsWith))
 						continue;
 					yield return traceData;
 				}
