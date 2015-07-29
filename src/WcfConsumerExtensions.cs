@@ -78,50 +78,53 @@ namespace HallLibrary.Extensions {
 			var xr = XmlTextReader.Create(path, new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment });
 			var skipMessageTypes = new[] { "System.ServiceModel.Channels.NullMessage", "System.ServiceModel.Description.ServiceMetadataExtension+HttpGetImpl+MetadataOnHelpPageMessage" };
 			var skipActions = new[] { "http://tempuri.org/IConnectionRegister/", "http://schemas.xmlsoap.org/" };
-			
+	
 			xr.Read();
-			do {
-				if (xr.Name.Equals("E2ETraceEvent")) {
-					var xd = (XElement)XDocument.ReadFrom(xr);
-					
+			do
+			{
+				if (xr.NodeType == XmlNodeType.Element && xr.Name.Equals("E2ETraceEvent"))
+				{
+					var xdr = xr.ReadSubtree();
+					xdr.Read();
+					var xd = (XElement)XDocument.ReadFrom(xdr);
 					var traceData = new TraceData();
-					
+	
 					var system = xd.GetElementByName("System");
 					traceData.TimeCreated = DateTime.Parse(system.GetElementByName("TimeCreated").AttributeAnyNS("SystemTime").Value);
 					traceData.Computer = system.GetElementByName("Computer").Value;
-					
+					traceData.ActivityID = Guid.Parse(system.GetElementByName("Correlation").AttributeAnyNS("ActivityID").Value);
+	
 					var messageLog = xd.GetElementByName("ApplicationData").GetElementByName("TraceData").GetElementByName("DataItem").GetElementByName("MessageLogTraceRecord");
 					traceData.MessageType = messageLog.AttributeAnyNS("Type").Value;
-					if (skipMessageTypes.Contains(traceData.MessageType))
-						continue;
-					
-					var source = messageLog.AttributeAnyNS("Source").Value;
-					
-					traceData.Source = source;
+					if (!skipMessageTypes.Contains(traceData.MessageType))
+					{
+						var source = messageLog.AttributeAnyNS("Source").Value;
 	
-					var soapEnvelope = messageLog.GetElementByName("Envelope", true);
-					if (soapEnvelope == null)
-					{
-						messageLog.Dump();
-					}
-					else
-					{
-						var header = soapEnvelope.GetElementByName("Header", true);
-						if (header == null)
+						traceData.Source = source;
+	
+						var soapEnvelope = messageLog.GetElementByName("Envelope", true);
+						if (soapEnvelope == null)
 						{
-							traceData.Action = messageLog.GetElementByName("Addressing")?.GetElementByName("Action").Value;
+							messageLog.Dump();
 						}
 						else
 						{
-							traceData.Action = header.GetElementByName("Action", true)?.Value;
-							traceData.Address = header.GetElementByName("To", true)?.Value;
+							var header = soapEnvelope.GetElementByName("Header", true);
+							if (header == null)
+							{
+								traceData.Action = messageLog.GetElementByName("Addressing")?.GetElementByName("Action").Value;
+							}
+							else
+							{
+								traceData.Action = header.GetElementByName("Action", true)?.Value;
+								traceData.Address = header.GetElementByName("To", true)?.Value;
+							}
+							traceData.Content = soapEnvelope.GetElementByName("Body", true).Elements().FirstOrDefault();
 						}
-						traceData.Content = soapEnvelope.GetElementByName("Body", true).Elements().FirstOrDefault();
+	
+						if (traceData.Action == null || !skipActions.Any(traceData.Action.StartsWith))
+							yield return traceData;
 					}
-					
-					if (traceData.Action != null && skipActions.Any(traceData.Action.StartsWith))
-						continue;
-					yield return traceData;
 				}
 			} while (xr.ReadToNextSibling("E2ETraceEvent"));
 		}
