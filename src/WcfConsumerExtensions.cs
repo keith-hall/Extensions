@@ -85,45 +85,66 @@ namespace HallLibrary.Extensions {
 				if (xr.NodeType == XmlNodeType.Element && xr.Name.Equals("E2ETraceEvent"))
 				{
 					var xdr = xr.ReadSubtree();
+					
 					xdr.Read();
 					var xd = (XElement)XDocument.ReadFrom(xdr);
 					var traceData = new TraceData();
-	
+					
 					var system = xd.GetElementByName("System");
 					traceData.TimeCreated = DateTime.Parse(system.GetElementByName("TimeCreated").AttributeAnyNS("SystemTime").Value);
 					traceData.Computer = system.GetElementByName("Computer").Value;
 					traceData.ActivityID = Guid.Parse(system.GetElementByName("Correlation").AttributeAnyNS("ActivityID").Value);
 	
-					var messageLog = xd.GetElementByName("ApplicationData").GetElementByName("TraceData").GetElementByName("DataItem").GetElementByName("MessageLogTraceRecord");
-					traceData.MessageType = messageLog.AttributeAnyNS("Type").Value;
-					if (!skipMessageTypes.Contains(traceData.MessageType))
+					var dataItem = xd.GetElementByName("ApplicationData").GetElementByName("TraceData")?.GetElementByName("DataItem");
+					if (dataItem != null)
 					{
-						var source = messageLog.AttributeAnyNS("Source").Value;
-	
-						traceData.Source = source;
-	
-						var soapEnvelope = messageLog.GetElementByName("Envelope", true);
-						if (soapEnvelope == null)
+						var messageLog = dataItem.GetElementByName("MessageLogTraceRecord");
+						if (messageLog == null)
 						{
-							messageLog.Dump();
-						}
-						else
-						{
-							var header = soapEnvelope.GetElementByName("Header", true);
-							if (header == null)
+							var traceRecord = dataItem.GetElementByName("TraceRecord");
+							if (traceRecord == null)
 							{
-								traceData.Action = messageLog.GetElementByName("Addressing")?.GetElementByName("Action").Value;
+								traceData.MessageType = "String";
+								traceData.Content = dataItem;
 							}
 							else
 							{
-								traceData.Action = header.GetElementByName("Action", true)?.Value;
-								traceData.Address = header.GetElementByName("To", true)?.Value;
-							}
-							traceData.Content = soapEnvelope.GetElementByName("Body", true).Elements().FirstOrDefault();
-						}
+								traceData.Action = traceRecord.AttributeAnyNS("Severity").Value;
+								traceData.MessageType = "Trace";
 	
-						if (traceData.Action == null || !skipActions.Any(traceData.Action.StartsWith))
+								traceData.Content = traceRecord;
+							}
 							yield return traceData;
+						}
+						else
+						{
+							traceData.MessageType = messageLog.AttributeAnyNS("Type").Value;
+							if (!skipMessageTypes.Contains(traceData.MessageType))
+							{
+								var source = messageLog.AttributeAnyNS("Source").Value;
+	
+								traceData.Source = source;
+	
+								var soapEnvelope = messageLog.GetElementByName("Envelope", true);
+								if (soapEnvelope == null)
+								{
+									messageLog.Dump();
+								}
+								else
+								{
+									var header = soapEnvelope.GetElementByName("Header", true);
+									traceData.Action = messageLog.GetElementByName("Addressing")?.GetElementByName("Action").Value ?? header?.GetElementByName("Action", true)?.Value;
+									traceData.Address = header?.GetElementByName("To", true)?.Value;
+									var body = soapEnvelope.GetElementByName("Body", true);
+									if (body != null)
+										traceData.Content = body.Elements().FirstOrDefault();
+									
+								}
+	
+								if (traceData.Action == null || !skipActions.Any(traceData.Action.StartsWith))
+									yield return traceData;
+							}
+						}
 					}
 				}
 			} while (xr.ReadToNextSibling("E2ETraceEvent"));
