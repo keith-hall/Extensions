@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace HallLibrary.Extensions
 {
@@ -112,8 +113,20 @@ namespace HallLibrary.Extensions
 		/// <param name="first">The first sequence to concatenate.</param>
 		/// <param name="second">The value to concatenate to the end of the <paramref name="first" /> sequence.</param>
 		/// <returns>The <paramref name="first" /> sequence concatenated with <paramref name="second" />.</returns>
-		public static IEnumerable<T> Concat<T> (this IEnumerable<T> first, T second) {
+		public static IEnumerable<T> Concat<T> (this IEnumerable<T> first, T second)
+		{
 			return first.Concat(second.AsSingleEnumerable());
+		}
+		
+		public static IEnumerable<T> OrderByNatural<T>(this IEnumerable<T> items, Func<T, string> selector, StringComparer stringComparer = null)
+		{
+			var regex = new Regex(@"\d+", RegexOptions.Compiled);
+			
+			int maxDigits = items
+				.SelectMany(i => regex.Matches(selector(i)).OfType<Match>().Select(digitChunk => (int?)digitChunk.Value.Length))
+				.Max() ?? 0;
+			
+			return items.OrderBy(i => regex.Replace(selector(i), match => match.Value.PadLeft(maxDigits, '0')), stringComparer ?? StringComparer.CurrentCulture);
 		}
 	}
 }
