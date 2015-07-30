@@ -44,6 +44,28 @@ namespace HallLibrary.Extensions
 		}
 		#endregion
 		
+		public static DataTable PivotData (DataTable source, IEnumerable<string> pivotColumns, Func<string, object, object, object> aggregate)
+		{
+			var pivotCols = pivotColumns.ToArray();
+			var copy = source.DefaultView.ToTable(true, source.Columns.OfType<DataColumn>().Select(c => c.ColumnName).Where(c => !pivotCols.Contains(c)).ToArray());
+			copy.PrimaryKey = copy.Columns.OfType<DataColumn>().ToArray();
+
+			var unique = OrderByNatural(source.Rows.OfType<DataRow>().Select(dr => dr[pivotCols[0]].ToString()).Distinct(), s => s).ToArray();
+			copy.Columns.AddRange(unique.Select(s => pivotCols.Skip(1).Select(c => new DataColumn(s + " " + c, source.Columns[c].DataType))).SelectMany(c => c).ToArray());
+
+			foreach (var row in source.Rows.OfType<DataRow>())
+			{
+				var existingRow = copy.Rows.Find(copy.PrimaryKey.Select(c => row[c.ColumnName]).ToArray());
+				var productName = row.Field<string>(pivotCols[0]);
+				foreach (var col in pivotCols.Skip(1))
+				{
+					existingRow.SetField(productName + " " + col, aggregate(col, existingRow[productName + " " + col], row[col]));
+				}
+			}
+
+			return copy;
+		}
+		
 		#region Conversion
 		public static void ConvertColumnsFromString (this DataTable dt, bool toMixed)
 		{
