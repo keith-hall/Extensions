@@ -147,7 +147,7 @@ namespace HallLibrary.Extensions
 		public static void ConvertFromString (this DataColumn column, bool toMixed)
 		{
 			if (! column.DataType.Equals(typeof(string)))
-				throw new ArgumentException("Column DataType is not String", "column");
+				throw new ArgumentException("Column DataType is not String", nameof(column));
 			
 			Convert(column, value => ToOrFromString.ConvertValueFromString((string)value), toMixed);
 		}
@@ -465,9 +465,9 @@ namespace HallLibrary.Extensions
 		public static DataTable ToDataTable(XmlReader xr, string row, string hierarchySeparator = null, bool includeAttributes = false, bool reverseHierarchy = false)
 		{
 			if (string.IsNullOrEmpty(row))
-				throw new ArgumentNullException("row");
+				throw new ArgumentNullException(nameof(row));
 			if (xr == null)
-				throw new ArgumentNullException("xr");
+				throw new ArgumentNullException(nameof(xr));
 			
 			bool shortCaptions = (hierarchySeparator == null);
 			hierarchySeparator = hierarchySeparator ?? @"/";
