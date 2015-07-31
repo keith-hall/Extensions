@@ -44,22 +44,29 @@ namespace HallLibrary.Extensions
 		}
 		#endregion
 		
-		public static DataTable PivotData (DataTable source, IEnumerable<string> pivotColumns, Func<string, object, object, object> aggregate)
+		public static DataTable PivotData(DataTable source, IEnumerable<string> columnsToPivot, IEnumerable<string> columnsToAggregate, Func<string, object, object, object> aggregate)
 		{
-			var pivotCols = pivotColumns.ToArray();
-			var copy = source.DefaultView.ToTable(true, source.Columns.OfType<DataColumn>().Select(c => c.ColumnName).Where(c => !pivotCols.Contains(c)).ToArray());
+			columnsToPivot = columnsToPivot.ToArray();
+			columnsToAggregate = columnsToAggregate.ToArray();
+			var allColsToRemove = columnsToPivot.Concat(columnsToAggregate).ToArray();
+			var copy = source.DefaultView.ToTable(true, source.Columns.OfType<DataColumn>().Select(c => c.ColumnName).Where(c => !allColsToRemove.Contains(c)).ToArray());
 			copy.PrimaryKey = copy.Columns.OfType<DataColumn>().ToArray();
 
-			var unique = OrderByNatural(source.Rows.OfType<DataRow>().Select(dr => dr[pivotCols[0]].ToString()).Distinct(), s => s).ToArray();
-			copy.Columns.AddRange(unique.Select(s => pivotCols.Skip(1).Select(c => new DataColumn(s + " " + c, source.Columns[c].DataType))).SelectMany(c => c).ToArray());
+			var unique = columnsToPivot.Select(c => source.Rows.OfType<DataRow>().Select(dr => c + ": " + dr[c].ToString()).Distinct().OrderByNatural(s => s));
+			var newCols = unique.Select(s => s.Select(v => columnsToAggregate.Select(c => new DataColumn(v + " - " + c, source.Columns[c].DataType)))).SelectMany(cs => cs.SelectMany(c => c)).ToArray();
+			copy.Columns.AddRange(newCols);
 
 			foreach (var row in source.Rows.OfType<DataRow>())
 			{
 				var existingRow = copy.Rows.Find(copy.PrimaryKey.Select(c => row[c.ColumnName]).ToArray());
-				var productName = row.Field<string>(pivotCols[0]);
-				foreach (var col in pivotCols.Skip(1))
+				var pivotValues = columnsToPivot.Select(c => Tuple.Create(c, row[c])).ToArray();
+				foreach (var col in columnsToAggregate)
 				{
-					existingRow.SetField(productName + " " + col, aggregate(col, existingRow[productName + " " + col], row[col]));
+					foreach (var value in pivotValues)
+					{
+						var pivotedColName = value.Item1 + ": " + value.Item2.ToString() + " - " + col;
+						existingRow.SetField(pivotedColName, aggregate(col, existingRow[pivotedColName], row[col]));
+					}
 				}
 			}
 
