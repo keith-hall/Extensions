@@ -60,7 +60,7 @@ namespace HallLibrary.Extensions {
 			where T : XContainer
 		{
 			Func<string, string> ensureEndsInSlash = s => s.EndsWith("/") ? s : (s + "/");
-			Func<XElement, bool> where = xe => xe.Name.LocalName == localName && ensureEndsInSlash(xe.Name.NamespaceName).Dump().Equals(namespaceURI.Dump()).Dump();
+			Func<XElement, bool> where = xe => xe.Name.LocalName == localName && ensureEndsInSlash(xe.Name.NamespaceName).Equals(namespaceURI);
 			
 			namespaceURI = ensureEndsInSlash(namespaceURI);
 			return source.Elements().Where(where);
