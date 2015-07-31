@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Linq;
 using System.Xml.Linq;
+using System.ServiceModel;
 
 namespace HallLibrary.Extensions {
 	public static class WcfConsumerExtensions {
 		public static TReturn CallWCFMethodWithHeaders<TChannel, TReturn> (TChannel channel, IEnumerable<System.ServiceModel.Channels.MessageHeader> headers, Func<TChannel, TReturn> callWCFMethod) {
-			using (var ocs = new OperationContextScope((System.ServiceModel.IContextChannel)channel)) {
+			using (var ocs = new OperationContextScope((IContextChannel)channel)) {
 				foreach (var header in headers)
 					OperationContext.Current.OutgoingMessageHeaders.Add(header);
 				return callWCFMethod(channel);
@@ -19,7 +20,7 @@ namespace HallLibrary.Extensions {
 		}
 		
 		public static System.ServiceModel.Channels.MessageHeader CreateWCFHeader<T> (string name, T value, string nameSpace = null) {
-			return new System.ServiceModel.MessageHeader<T>(value).GetUntypedHeader(name, nameSpace ?? string.Empty);
+			return new MessageHeader<T>(value).GetUntypedHeader(name, nameSpace ?? string.Empty);
 		}
 	}
 	
@@ -29,6 +30,7 @@ namespace HallLibrary.Extensions {
 		public DateTime TimeCreated;
 		public string Action;
 		public string MessageType;
+		public Guid ActivityID;
 		public string Source;
 		public string Address;
 		public XElement Content;
@@ -131,7 +133,7 @@ namespace HallLibrary.Extensions {
 								var soapEnvelope = messageLog.GetElementByName("Envelope", true);
 								if (soapEnvelope == null)
 								{
-									messageLog.Dump();
+									//messageLog.Dump();
 								}
 								else
 								{
