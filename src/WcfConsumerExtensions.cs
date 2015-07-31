@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Xml;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace HallLibrary.Extensions {
 	public static class WcfConsumerExtensions {
