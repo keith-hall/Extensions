@@ -69,6 +69,7 @@
     <Compile Include="src\StringExtensions.cs" />
     <Compile Include="src\InteractivePrompt.cs" />
     <Compile Include="src\RelativeTime.cs" />
+    <Compile Include="src\WcfConsumerExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
