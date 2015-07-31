@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Xml;
+using System.Linq;
 
 namespace HallLibrary.Extensions {
 	public static class WcfConsumerExtensions {
