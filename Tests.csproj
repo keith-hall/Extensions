@@ -50,6 +50,8 @@
   </Choose>
   <ItemGroup>
     <Compile Include="tests\StringTests.cs" />
+    <Compile Include="tests\EnumerableTests.cs" />
+    <Compile Include="tests\NumberFormattingTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Extensions.csproj">
