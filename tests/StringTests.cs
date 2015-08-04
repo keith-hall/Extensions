@@ -90,5 +90,20 @@ namespace Tests
 																									  @"text"
 																								  }));
 		}
+		
+		[TestMethod]
+		public void TestLabel()
+		{
+			var labels = new [] {
+				"firstName", "First Name",
+				"uniqueID", "Unique ID",
+				"Hello World", "Hello World",
+				"HelloWorld", "Hello World",
+				"unique ID", "unique ID"
+			};
+			for (var i = 0; i < labels.Length; i += 2) {
+				Assert.AreEqual(ControlFactory.GetLabel(labels[i]), labels[i + 1]);
+			}
+		}
 	}
 }
