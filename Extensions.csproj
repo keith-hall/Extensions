@@ -71,6 +71,7 @@
     <Compile Include="src\InteractivePrompt.cs" />
     <Compile Include="src\RelativeTime.cs" />
     <Compile Include="src\WcfConsumerExtensions.cs" />
+    <Compile Include="src\NumberFormatting.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
