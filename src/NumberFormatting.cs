@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace HallLibrary.Extensions
 {
 	public static class NumberFormatting
