@@ -23,13 +23,15 @@ namespace HallLibrary.Extensions
 		
 			/*
 			// alternative implementation, without regex
-			var digits = write.IndexOf(".", StringComparison.InvariantCultureIgnoreCase);
+			if (thousandsSeparator == null)
+				thousandsSeparator = _defaultThousandsSeparator.ToString();
+			var digits = number.IndexOf(".", StringComparison.InvariantCultureIgnoreCase);
 			if (digits == -1)
-				digits = write.Length;
+				digits = number.Length;
 
 			for (var pos = digits - 3; pos > 0; pos -= 3)
 			{
-				write = write.Substring(0, pos) + thousandsSeparator + write.Substring(pos);
+				number = number.Substring(0, pos) + thousandsSeparator + number.Substring(pos);
 			}
 			*/
 		}
