@@ -20,8 +20,19 @@ namespace HallLibrary.Extensions
 			if (!IsValidNumber(number))
 				throw new ArgumentException(nameof(number), "String does not contain a valid number");
 			return _thousands.Replace(number, thousandsSeparator ?? _defaultThousandsSeparator.ToString()); // TODO: replace comma with thousands separator from current culture
-		}
 		
+			/*
+			// alternative implementation, without regex
+			var digits = write.IndexOf(".", StringComparison.InvariantCultureIgnoreCase);
+			if (digits == -1)
+				digits = write.Length;
+
+			for (var pos = digits - 3; pos > 0; pos -= 3)
+			{
+				write = write.Substring(0, pos) + thousandsSeparator + write.Substring(pos);
+			}
+			*/
+		}
 		/*
 		// Store integer 182
 		int decValue = 182;
