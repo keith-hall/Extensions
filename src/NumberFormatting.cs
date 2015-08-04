@@ -9,12 +9,16 @@ namespace HallLibrary.Extensions
 		private const char _defaultThousandsSeparator = ',';
 		private const string _defaultDecimalSeparatorForRegex = @"\.";
 		
-		public static string AddThousandsSeparators (string number, string thousandsSeparator = null) {
-			if (_number.IsMatch(number)) {
-				return _thousands.Replace(number, thousandsSeparator ?? _defaultThousandsSeparator.ToString()); // TODO: replace comma with thousands separator from current culture
-			} else {
-				return number;
-			}
+		public static bool IsValidNumber (string value)
+		{
+			return _number.IsMatch(value);
+		}
+		
+		public static string AddThousandsSeparators (string number, string thousandsSeparator = null)
+		{
+			if (!IsValidNumber(number))
+				throw new ArgumentException(nameof(number), "String does not contain a valid number");
+			return _thousands.Replace(number, thousandsSeparator ?? _defaultThousandsSeparator.ToString()); // TODO: replace comma with thousands separator from current culture
 		}
 		
 		/*
