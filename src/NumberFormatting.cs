@@ -9,7 +9,7 @@ namespace HallLibrary.Extensions
 		
 		public static string AddThousandsSeparators (string number, string thousandsSeparator = null) {
 			if (_number.IsMatch(number)) {
-				return _thousands.Replace(number, thousandsSeparator ?? _defaultThousandsSeparator.ToString());
+				return _thousands.Replace(number, thousandsSeparator ?? _defaultThousandsSeparator.ToString()); // TODO: replace comma with thousands separator from current culture
 			} else {
 				return number;
 			}
