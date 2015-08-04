@@ -14,5 +14,14 @@ namespace HallLibrary.Extensions
 				return number;
 			}
 		}
+		
+		/*
+		// Store integer 182
+		int decValue = 182;
+		// Convert integer 182 as a hex in a string variable
+		string hexValue = decValue.ToString("X"); // doesn't add 0x prefix
+		// Convert the hex string back to the number
+		int decAgain = int.Parse(hexValue, System.Globalization.NumberStyles.HexNumber); // doesn't cope with 0x prefix
+		*/
 	}
 }
