@@ -171,10 +171,19 @@ namespace HallLibrary.Extensions {
 		
 		public static void FilterTracesFromFile(string inputPath, Func<TraceData, bool> filter, string outputPath)
 		{
-			var file = XmlWriter.Create(outputPath, new XmlWriterSettings { ConformanceLevel = ConformanceLevel.Fragment });
-			foreach (var trace in ReadTracesFromFile(inputPath).Where(filter).Select(td => td.Original))
+			using (var file = XmlWriter.Create(outputPath, new XmlWriterSettings { ConformanceLevel = ConformanceLevel.Fragment }))
 			{
-				trace.WriteTo(file);
+				try
+				{
+					foreach (var trace in ReadTracesFromFile(inputPath).Where(filter).Select(td => td.Original))
+					{
+						trace.WriteTo(file);
+					}
+				}
+				finally
+				{
+					file.Close();
+				}
 			}
 		}
 	}
