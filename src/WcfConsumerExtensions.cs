@@ -122,7 +122,9 @@ namespace HallLibrary.Extensions {
 						var soapEnvelope = messageLog.GetElementByName("Envelope", true);
 						if (soapEnvelope == null)
 						{
+							#if LINQPAD
 							messageLog.Dump();
+							#endif
 						}
 						else
 						{
