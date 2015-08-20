@@ -24,7 +24,7 @@ void Main(string[] args)
 		args = new[] { fd.FileName };
 	}
 	var xe = XElement.Load(args[0]);
-	var parent = xe.Descendants().First(x => !x.HasElements).Parent;
+	var parent = xe.DescendantsAndSelf().Where(x => x.Elements().Any(x2 => !x2.HasElements)).First();
 	var dt = XML.ToDataTable(XmlReader.Create(args[0]), parent.Name.LocalName);
 	
 	if (args.Length == 2)
