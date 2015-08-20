@@ -190,6 +190,19 @@ namespace HallLibrary.Extensions
 				}
 			}
 		}
+		
+		public static string ReplaceAll (this string haystack, IEnumerable<string> find, string replaceWith) {
+			var pos = 0;
+			var sb = new StringBuilder();
+			foreach (var match in haystack.AllSortedIndexesOf(find))
+			{
+				sb.Append(haystack.Substring(pos, match.Value - pos));
+				sb.Append(replaceWith);
+				pos = match.Value + match.Key.Length;
+			}
+			sb.Append(haystack.Substring(pos, haystack.Length - pos));
+			return sb.ToString();
+		}
 		#endregion
 		/*
 		#region SGML
