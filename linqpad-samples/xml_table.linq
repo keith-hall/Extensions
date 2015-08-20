@@ -1,3 +1,11 @@
+<Query Kind="Program">
+  <Output>DataGrids</Output>
+  <Reference>&lt;RuntimeDirectory&gt;\System.Windows.Forms.dll</Reference>
+  <NuGetReference>HallLibrary.Extensions</NuGetReference>
+  <Namespace>HallLibrary.Extensions</Namespace>
+  <Namespace>System.Windows.Forms</Namespace>
+</Query>
+
 void Main(string[] args)
 {
 	if (args == null || args.Length == 0)
@@ -18,6 +26,9 @@ void Main(string[] args)
 	var xe = XElement.Load(args[0]);
 	var parent = xe.Descendants().First(x => !x.HasElements).Parent;
 	var dt = XML.ToDataTable(XmlReader.Create(args[0]), parent.Name.LocalName);
+	
+	if (args.Length == 2)
+		dt = dt.Filter(args[1]);
 	
 	#if (!CMD)
 		dt.Dump();
