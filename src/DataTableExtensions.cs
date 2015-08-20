@@ -156,7 +156,7 @@ namespace HallLibrary.Extensions
 			if (! column.DataType.Equals(typeof(string)))
 				throw new ArgumentException("Column DataType is not String", nameof(column));
 			
-			Convert(column, value => value is DBNull ? null : ToOrFromString.ConvertValueFromString((string)value), toMixed);
+			Convert(column, value => value is DBNull ? DBNull.Value : ToOrFromString.ConvertValueFromString((string)value), toMixed);
 		}
 		#endregion
 		
