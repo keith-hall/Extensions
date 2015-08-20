@@ -15,6 +15,13 @@ namespace HallLibrary.Extensions
 	public static class DataTableExtensions
 	{
 		#region CSV
+		/// <summary>
+		/// Write the contents of the <see cref="DataTable" /> <paramref name="table" /> to <paramref name="writer" />.
+		/// </summary>
+		/// <param name="table">The <see cref="DataTable" /> whose contents to write.</param>
+		/// <param name="writer">The <see cref="TextWriter" /> to output the contents to.</param>
+		/// <param name="separator">The field separator to use in the CSV output.</param>
+		/// <param name="includeColumnNamesAsHeader">Whether to include a header row with the column names from the <paramref name="table" /> in the CSV.</param>
 		public static void WriteToCSV(this DataTable table, TextWriter writer, string separator = "\t", bool includeColumnNamesAsHeader = true)
 		{
 			CSV.Write(
@@ -149,7 +156,7 @@ namespace HallLibrary.Extensions
 			if (! column.DataType.Equals(typeof(string)))
 				throw new ArgumentException("Column DataType is not String", nameof(column));
 			
-			Convert(column, value => ToOrFromString.ConvertValueFromString((string)value), toMixed);
+			Convert(column, value => value is DBNull ? null : ToOrFromString.ConvertValueFromString((string)value), toMixed);
 		}
 		#endregion
 		
@@ -242,11 +249,11 @@ namespace HallLibrary.Extensions
 		}
 		
 		/// <summary>
-		/// Filter the specified <paramref name="rows"/> from the data<paramref name="table"/> into a new <see cref="System.Data.DataTable"/>.
+		/// Filter the specified <paramref name="rows" /> from the <see cref="DataTable" /> <paramref name="table" /> into a new <see cref="DataTable" />.
 		/// </summary>
-		/// <param name="table">The <see cref="System.Data.DataTable"/> to filter.</param>
+		/// <param name="table">The <see cref="DataTable" /> to filter.</param>
 		/// <param name="rows">The rows to filter.</param>
-		/// <returns>A new <see cref="System.Data.DataTable"/> containing the specified <paramref name="rows"/>.</returns>
+		/// <returns>A new <see cref="DataTable" /> containing the specified <paramref name="rows" />.</returns>
 		public static DataTable Filter(this DataTable table, IEnumerable<DataRow> rows)
 		{
 			var filtered = table.Clone();
@@ -263,13 +270,13 @@ namespace HallLibrary.Extensions
 	public static class CSV
 	{
 		/// <summary>
-		/// Open a CSV file at the specified <paramref name="path"/> using the specified field <paramref name="separator"/>.
+		/// Open a CSV file at the specified <paramref name="path" /> using the specified field <paramref name="separator" />.
 		/// </summary>
 		/// <param name="path">The path to the CSV file.</param>
 		/// <param name="separator">The field separator to use.  If <c>null</c>, it will attempt to determine the field separator automatically.</param>
-		/// <returns>An enumerable containing a <see cref="System.String"/> array all the fields in each row.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="path"/> is null or empty.</exception>
-		/// <exception cref="InvalidDataException">When <paramref name="separator"/> is <c>null</c> and it is unable to automatically determine the field separator.</exception>
+		/// <returns>An enumerable containing a <see cref="String" /> array all the fields in each row.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="path" /> is null or empty.</exception>
+		/// <exception cref="InvalidDataException">When <paramref name="separator" /> is <c>null</c> and it is unable to automatically determine the field separator.</exception>
 		public static IEnumerable<string[]> OpenCSV(string path, string separator = null)
 		{ //http://msdn.microsoft.com/en-us/library/microsoft.visualbasic.fileio.textfieldparser.aspx
 			if (string.IsNullOrEmpty(separator))
@@ -296,7 +303,7 @@ namespace HallLibrary.Extensions
 		/// </summary>
 		/// <param name="path">The path to the CSV file.</param>
 		/// <returns>The field separator used in the specified CSV file.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="path"/> is null or empty.</exception>
+		/// <exception cref="ArgumentNullException"><paramref name="path" /> is null or empty.</exception>
 		/// <exception cref="InvalidDataException">When it is unable to automatically determine the field separator.</exception>
 		public static string DetermineCSVSeparator (string path)
 		{
@@ -321,14 +328,14 @@ namespace HallLibrary.Extensions
 		}
 		
 		/// <summary>
-		/// Open a CSV file <paramref name="path"/> and get it's contents respresented in a <see cref="System.Data.DataTable"/>.
+		/// Open a CSV file <paramref name="path" /> and get it's contents respresented in a <see cref="DataTable" />.
 		/// </summary>
 		/// <param name="path">The path to the CSV file.</param>
 		/// <param name="separator">The field separator used in the CSV file.</param>
 		/// <param name="containsHeaders">Specifies whether the CSV file contains a header row or not, which will be used to set the DataTable column headings.</param>
 		/// <param name="inferTypes">Specifies whether to attempt to determine the type of each column based on it's contents.  Supports dates and numbers.</param>
 		/// <param name="tolerateMalformedFile">Specifies whether to continue loading a file when some lines are malformed and contain too many fields.</param>
-		/// <returns>A <see cref="System.Data.DataTable"/> representing the contents of the CSV file.</returns>
+		/// <returns>A <see cref="DataTable" /> representing the contents of the CSV file.</returns>
 		/// <exception cref="InvalidDataException">A line in the file is malformed and contains too many fields.</exception>
 		public static DataTable Load(string path, string separator = null, bool containsHeaders = true, bool inferTypes = false, bool tolerateMalformedFile = false)
 		{
@@ -452,16 +459,16 @@ namespace HallLibrary.Extensions
 	public static class XML
 	{
 		/// <summary>
-		/// Iterate through the specified <see cref="XmlReader" /> and build a <see cref="DataTable"/> from it.
+		/// Iterate through the specified <see cref="XmlReader" /> and build a <see cref="DataTable" /> from it.
 		/// </summary>
-		/// <param name="xr">The <see cref="XmlReader" /> to use to build the <see cref="DataTable"/>.</param>
+		/// <param name="xr">The <see cref="XmlReader" /> to use to build the <see cref="DataTable" />.</param>
 		/// <param name="row">The name of the XML element that represents a row.</param>
-		/// <param name="hierarchySeparator">If null, will use short column names, as opposed to the path relative to the <paramref name="row"/>.</param>
-		/// <param name="includeAttributes">Include attributes in the <see cref="DataTable"/>.</param>
+		/// <param name="hierarchySeparator">If null, will use short column names, as opposed to the path relative to the <paramref name="row" />.</param>
+		/// <param name="includeAttributes">Include attributes in the <see cref="DataTable" />.</param>
 		/// <param name="reverseHierarchy">Reverse the order of the column name hierarchy when not using short column names.</param> 
-		/// <returns>A <see cref="DataTable"/> representing the XML.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="row"/> is null.</exception>
-		/// <exception cref="ArgumentNullException"><paramref name="xr"/> is null.</exception>
+		/// <returns>A <see cref="DataTable" /> representing the XML.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="row" /> is null.</exception>
+		/// <exception cref="ArgumentNullException"><paramref name="xr" /> is null.</exception>
 		public static DataTable ToDataTable(XmlReader xr, string row, string hierarchySeparator = null, bool includeAttributes = false, bool reverseHierarchy = false)
 		{
 			if (string.IsNullOrEmpty(row))
@@ -555,6 +562,8 @@ namespace HallLibrary.Extensions
 		/// <returns>The <see cref="String" /> <paramref name="value" /> if not possible to convert, otherwise a <see cref="Decimal" />, <see cref="DateTime" /> or <see cref="Boolean" />.</returns>
 		public static object ConvertValueFromString(string value)
 		{
+			if (value == null)
+				return null;
 			decimal valAsDecimal;
 			if (!(value.StartsWith(@"0") && value.Length > 1) // ignore it if it starts with 0
 				&& decimal.TryParse(value, out valAsDecimal)) // check if it is a valid number, use decimal as it keeps the formatting / precision
