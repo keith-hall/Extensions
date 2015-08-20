@@ -30,7 +30,7 @@ void Main(string[] args)
 		return l.CountExceeds(1) && l.Distinct().CountEquals(1);
 	}).First().Elements().First().Name.LocalName;
 	var dt = XML.ToDataTable(XmlReader.Create(args[0]), row);
-	
+	dt.ConvertColumnsFromString(false);
 	if (args.Length == 2)
 		dt = dt.Filter(args[1]);
 	
