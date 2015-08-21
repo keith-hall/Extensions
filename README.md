@@ -31,7 +31,7 @@ For example, the following XML:
 ```
 can be displayed like:
 
-User@id | FirstName | LastName | UserName | Address.BuildingNumber | Address.Street | Address.Town | Address.PostCode
+@id | FirstName | LastName | UserName | Address.BuildingNumber | Address.Street | Address.Town | Address.PostCode
 --- | --- | --- | --- | --- | --- | --- | ---
 1 | Fred | Bloggs | bloggsf | 12 | The Street | Exampletown | null
 3 | Joe | Bloggs | bloggsj | 9 | Somewhere Else | Exampletown | TY12 6UA
