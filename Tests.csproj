@@ -52,6 +52,7 @@
     <Compile Include="tests\StringTests.cs" />
     <Compile Include="tests\EnumerableTests.cs" />
     <Compile Include="tests\NumberFormattingTests.cs" />
+    <Compile Include="tests\XMLTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Extensions.csproj">
