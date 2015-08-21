@@ -489,7 +489,7 @@ namespace HallLibrary.Extensions
 			bool shortCaptions = (hierarchySeparator == null);
 			hierarchySeparator = hierarchySeparator ?? @"/";
 			var stack = new Stack<string>();
-			var dt = new DataTable(rows.Select(r => r.Name.LocalName).Distinct().CountEquals(1) ? rows.First().Name.LocalName : rows.First().Parent.Name.LocalName);
+			var dt = new DataTable(rows.Select(r => r.Name.LocalName).Distinct().CountEquals(1) ? rows.First().Name.LocalName : rows.First().Parent?.Name.LocalName);
 	
 			Action<string, DataRow, string> processValue = (name, dataRow, value) =>
 			{
