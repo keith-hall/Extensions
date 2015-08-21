@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace HallLibrary.Extensions
 {
 	/// <summary>
-	/// Contains extension methods for working with <see cref="System.String" /> objects
+	/// Contains extension methods for working with <see cref="String" /> objects
 	/// </summary>
 	public static class StringExtensions
 	{
@@ -15,13 +15,13 @@ namespace HallLibrary.Extensions
 		
 		#region IndexOf related methods
 		/// <summary>
-		/// Reports the zero-based index of the <i>end</i> of the first occurrence of the specified <paramref name="find" /> string in the current <see cref="System.String" /> object.
+		/// Reports the zero-based index of the <i>end</i> of the first occurrence of the specified <paramref name="find" /> string in the current <see cref="String" /> object.
 		/// </summary>
 		/// <param name="value">The string to search in.</param>
 		/// <param name="find">The string to seek.</param>
 		/// <param name="startIndex">The search starting position.</param>
 		/// <param name="comparisonType">One of the enumeration values that specifies the rules for the search.</param>
-		/// <returns>Reports the zero-based index of the <i>end</i> of the first occurrence of the specified <paramref name="find" /> string in the current <see cref="System.String" /> object.</returns>
+		/// <returns>Reports the zero-based index of the <i>end</i> of the first occurrence of the specified <paramref name="find" /> string in the current <see cref="String" /> object.</returns>
 		/// <exception cref="ArgumentOutOfRangeException"><paramref name="startIndex" /> is less than 0 (zero) or greater than the length of this string.</exception>
 		public static int IndexOfEnd(this string value, string find, int? startIndex = null, StringComparison comparisonType = DefaultStringComparison)
 		{
@@ -32,12 +32,12 @@ namespace HallLibrary.Extensions
 		}
 
 		/// <summary>
-		/// Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> string in the current <see cref="System.String" /> object.
+		/// Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> string in the current <see cref="String" /> object.
 		/// </summary>
 		/// <param name="value">The string to search in.</param>
 		/// <param name="find">The string to seek.</param>
 		/// <param name="comparisonType">One of the enumeration values that specifies the rules for the search.</param>
-		/// <returns>Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> string in the current <see cref="System.String" /> object.</returns>
+		/// <returns>Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> string in the current <see cref="String" /> object.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="find" /> is <c>null</c>.</exception>
 		public static IEnumerable<int> AllIndexesOf(this string value, string find, StringComparison comparisonType = DefaultStringComparison)
 		{
@@ -50,12 +50,12 @@ namespace HallLibrary.Extensions
 		}
 
 		/// <summary>
-		/// Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> strings in the current <see cref="System.String" /> object.
+		/// Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> strings in the current <see cref="String" /> object.
 		/// </summary>
 		/// <param name="value">The string to search in.</param>
 		/// <param name="find">The strings to seek.</param>
 		/// <param name="comparisonType">One of the enumeration values that specifies the rules for the search.</param>
-		/// <returns>Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> strings in the current <see cref="System.String" /> object.</returns>
+		/// <returns>Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> strings in the current <see cref="String" /> object.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="find" /> contains a <c>null</c> value.</exception>
 		/// <remarks>Searches through <paramref name="value" /> for each <paramref name="find" /> in parallel, for increased performance. Therefore, note that the order in which the indexes are returned is not deterministic. See <see cref="AllSortedIndexesOf" />.</remarks>
 		private static IEnumerable<KeyValuePair<string, int>> AllIndexesOf(this string value, IEnumerable<string> find, StringComparison comparisonType = DefaultStringComparison)
@@ -81,12 +81,12 @@ namespace HallLibrary.Extensions
 		}*/
 
 		/// <summary>
-		/// Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> strings in the current <see cref="System.String" /> object, in the order in which they appear.
+		/// Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> strings in the current <see cref="String" /> object, in the order in which they appear.
 		/// </summary>
 		/// <param name="value">The string to search in.</param>
 		/// <param name="find">The strings to seek.</param>
 		/// <param name="comparisonType">One of the enumeration values that specifies the rules for the search.</param>
-		/// <returns>Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> strings in the current <see cref="System.String" /> object, in the order in which they appear.</returns>
+		/// <returns>Reports the zero-based indexes of all the occurrences of the specified <paramref name="find" /> strings in the current <see cref="String" /> object, in the order in which they appear.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="find" /> contains a <c>null</c> value.</exception>
 		public static IOrderedEnumerable<KeyValuePair<string, int>> AllSortedIndexesOf(this string value, IEnumerable<string> find, StringComparison comparisonType = DefaultStringComparison)
 		{
@@ -97,12 +97,12 @@ namespace HallLibrary.Extensions
 
 		#region Text related methods
 		/// <summary>
-		/// Reports the number of times the specified <paramref name="find" /> string occurs in the current <see cref="System.String" /> object.
+		/// Reports the number of times the specified <paramref name="find" /> string occurs in the current <see cref="String" /> object.
 		/// </summary>
 		/// <param name="value">The string to search in.</param>
 		/// <param name="find">The string to seek.</param>
 		/// <param name="comparisonType">One of the enumeration values that specifies the rules for the search.</param>
-		/// <returns>Reports the number of times the specified <paramref name="find" /> string occurs in the current <see cref="System.String" /> object.</returns>
+		/// <returns>Reports the number of times the specified <paramref name="find" /> string occurs in the current <see cref="String" /> object.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="find" /> is <c>null</c>.</exception>
 		public static int CountOccurrences(this string value, string find, StringComparison comparisonType = DefaultStringComparison)
 		{
@@ -110,12 +110,12 @@ namespace HallLibrary.Extensions
 		}
 
 		/// <summary>
-		/// Retrieves the text that occurs in the current <see cref="System.String" /> object before the first occurrence of <paramref name="find" />, or an empty string if there are no occurrences.
+		/// Retrieves the text that occurs in the current <see cref="String" /> object before the first occurrence of <paramref name="find" />, or an empty string if there are no occurrences.
 		/// </summary>
 		/// <param name="value">The string to search in.</param>
 		/// <param name="find">The string to seek.</param>
 		/// <param name="comparisonType">One of the enumeration values that specifies the rules for the search.</param>
-		/// <returns>Retrieves the text that occurs in the current <see cref="System.String" /> object before the first occurrence of <paramref name="find" />, or an empty string if there are no occurrences.</returns>
+		/// <returns>Retrieves the text that occurs in the current <see cref="String" /> object before the first occurrence of <paramref name="find" />, or an empty string if there are no occurrences.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="find" /> is <c>null</c>.</exception>
 		public static string TextBefore(this string value, string find, StringComparison comparisonType = DefaultStringComparison)
 		{
@@ -126,12 +126,12 @@ namespace HallLibrary.Extensions
 		}
 
 		/// <summary>
-		/// Retrieves the text that occurs in the current <see cref="System.String" /> object after the first occurrence of <paramref name="find" />, or an empty string if there are no occurrences.
+		/// Retrieves the text that occurs in the current <see cref="String" /> object after the first occurrence of <paramref name="find" />, or an empty string if there are no occurrences.
 		/// </summary>
 		/// <param name="value">The string to search in.</param>
 		/// <param name="find">The string to seek.</param>
 		/// <param name="comparisonType">One of the enumeration values that specifies the rules for the search.</param>
-		/// <returns>Retrieves the text that occurs in the current <see cref="System.String" /> object after the first occurrence of <paramref name="find" />, or an empty string if there are no occurrences.</returns>
+		/// <returns>Retrieves the text that occurs in the current <see cref="String" /> object after the first occurrence of <paramref name="find" />, or an empty string if there are no occurrences.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="find" /> is <c>null</c>.</exception>
 		public static string TextAfter(this string value, string find, StringComparison comparisonType = DefaultStringComparison)
 		{
@@ -142,13 +142,13 @@ namespace HallLibrary.Extensions
 		}
 
 		/// <summary>
-		/// Retrieves the text that occurs in the current <see cref="System.String" /> object after the first occurrence of <paramref name="start" /> and before the first subsequent occurrence of <paramref name="end" />, or an empty string if either are not found.
+		/// Retrieves the text that occurs in the current <see cref="String" /> object after the first occurrence of <paramref name="start" /> and before the first subsequent occurrence of <paramref name="end" />, or an empty string if either are not found.
 		/// </summary>
 		/// <param name="value">The string to search in.</param>
 		/// <param name="start">The first string to seek.</param>
 		/// <param name="end">The next string to seek.</param>
 		/// <param name="comparisonType">One of the enumeration values that specifies the rules for the search.</param>
-		/// <returns>Retrieves the text that occurs in the current <see cref="System.String" /> object after the first occurrence of <paramref name="start" /> and before the first subsequent occurrence of <paramref name="end" />, or an empty string if either are not found.</returns>
+		/// <returns>Retrieves the text that occurs in the current <see cref="String" /> object after the first occurrence of <paramref name="start" /> and before the first subsequent occurrence of <paramref name="end" />, or an empty string if either are not found.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="start" /> or <paramref name="end" /> is <c>null</c>.</exception>
 		public static string TextBetween(this string value, string start, string end, StringComparison comparisonType = DefaultStringComparison)
 		{
@@ -156,13 +156,13 @@ namespace HallLibrary.Extensions
 		}
 
 		/// <summary>
-		/// Retrieves the text that occurs in the current <see cref="System.String" /> object after each occurrence of <paramref name="start" /> and before the first subsequent occurrence of <paramref name="end" />, or an empty enumerable.
+		/// Retrieves the text that occurs in the current <see cref="String" /> object after each occurrence of <paramref name="start" /> and before the first subsequent occurrence of <paramref name="end" />, or an empty enumerable.
 		/// </summary>
 		/// <param name="value">The string to search in.</param>
 		/// <param name="start">The start string to seek.</param>
 		/// <param name="end">The end string to seek.</param>
 		/// <param name="comparisonType">One of the enumeration values that specifies the rules for the search.</param>
-		/// <returns>Retrieves the text that occurs in the current <see cref="System.String" /> object after each occurrence of <paramref name="start" /> and before the first subsequent occurrence of <paramref name="end" />, or an empty enumerable.</returns>
+		/// <returns>Retrieves the text that occurs in the current <see cref="String" /> object after each occurrence of <paramref name="start" /> and before the first subsequent occurrence of <paramref name="end" />, or an empty enumerable.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="start" /> or <paramref name="end" /> is <c>null</c>.</exception>
 		public static IEnumerable<string> AllTextBetween(this string value, string start, string end, StringComparison comparisonType = DefaultStringComparison)
 		{
@@ -191,7 +191,17 @@ namespace HallLibrary.Extensions
 			}
 		}
 		
-		public static string ReplaceAll (this string haystack, IEnumerable<string> find, string replaceWith) {
+		/// <summary>
+		/// Replaces all the occurrences of each <paramref name="find" /> in the current <see cref="String" /> with <paramref name="replaceWith" />.
+		/// </summary>
+		/// <param name="haystack">The string to make replacements in.</param>
+		/// <param name="find">The strings to seek.</param>
+		/// <param name="replaceWith">The string to use as a replacement.</param>
+		/// <param name="comparisonType">One of the enumeration values that specifies the rules for the search.</param>
+		/// <returns><paramref name="haystack" /> with all occurrences of <paramref name="find" /> replaced with <paramref name="replaceWith" />.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="haystack" /> is <c>null</c>.</exception>
+		
+		public static string ReplaceAll(this string haystack, IEnumerable<string> find, string replaceWith, StringComparison comparisonType = DefaultStringComparison) {
 			var pos = 0;
 			var sb = new StringBuilder();
 			foreach (var match in haystack.AllSortedIndexesOf(find))
