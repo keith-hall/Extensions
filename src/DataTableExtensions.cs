@@ -459,92 +459,88 @@ namespace HallLibrary.Extensions
 	public static class XML
 	{
 		/// <summary>
-		/// Iterate through the specified <see cref="XmlReader" /> and build a <see cref="DataTable" /> from it.
+		/// Iterate through the specified <paramref name="xml" /> and build a <see cref="DataTable" /> from it.
 		/// </summary>
-		/// <param name="xr">The <see cref="XmlReader" /> to use to build the <see cref="DataTable" />.</param>
-		/// <param name="row">The name of the XML element that represents a row.</param>
-		/// <param name="hierarchySeparator">If null, will use short column names, as opposed to the path relative to the <paramref name="row" />.</param>
+		/// <param name="xml">The XML element in which to find rows.</param>
+		/// <param name="hierarchySeparator">If null, will use short column names, as opposed to the path relative to the row.</param>
 		/// <param name="includeAttributes">Include attributes in the <see cref="DataTable" />.</param>
 		/// <param name="reverseHierarchy">Reverse the order of the column name hierarchy when not using short column names.</param> 
 		/// <returns>A <see cref="DataTable" /> representing the XML.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="row" /> is null.</exception>
-		/// <exception cref="ArgumentNullException"><paramref name="xr" /> is null.</exception>
-		public static DataTable ToDataTable(XmlReader xr, string row, string hierarchySeparator = null, bool includeAttributes = false, bool reverseHierarchy = false)
+		/// <exception cref="ArgumentNullException"><paramref name="xml" /> is null.</exception>
+		public static DataTable ToDataTable(XElement xml, string hierarchySeparator = null, bool includeAttributes = false, bool reverseHierarchy = false)
 		{
-			if (string.IsNullOrEmpty(row))
-				throw new ArgumentNullException(nameof(row));
-			if (xr == null)
-				throw new ArgumentNullException(nameof(xr));
+			return ToDataTable(xml.DescendantsAndSelf().First(x => x.Elements().CountExceeds(1)).Elements(), hierarchySeparator, includeAttributes, reverseHierarchy);
+		}
+	
+		/// <summary>
+		/// Iterate through the specified <paramref name="rows" /> and build a <see cref="DataTable" /> from them.
+		/// </summary>
+		/// <param name="rows">The XML elements that each represent a row.</param>
+		/// <param name="hierarchySeparator">If null, will use short column names, as opposed to the path relative to the row.</param>
+		/// <param name="includeAttributes">Include attributes in the <see cref="DataTable" />.</param>
+		/// <param name="reverseHierarchy">Reverse the order of the column name hierarchy when not using short column names.</param> 
+		/// <returns>A <see cref="DataTable" /> representing the XML.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="rows" /> is null.</exception>
+		public static DataTable ToDataTable(IEnumerable<XElement> rows, string hierarchySeparator = null, bool includeAttributes = false, bool reverseHierarchy = false)
+		{
+			if (rows == null || ! rows.Any())
+				throw new ArgumentNullException(nameof(rows));
 			
 			bool shortCaptions = (hierarchySeparator == null);
 			hierarchySeparator = hierarchySeparator ?? @"/";
 			var stack = new Stack<string>();
-			var dt = new DataTable();
-
-			Action<string, DataRow> process = (name, relatedRow) =>
+			var dt = new DataTable(rows.Select(r => r.Name.LocalName).Distinct().CountEquals(1) ? rows.First().Name.LocalName : rows.First().Parent.Name.LocalName);
+	
+			Action<string, DataRow, string> processValue = (name, dataRow, value) =>
 			{
-				if (xr.HasValue && !string.IsNullOrWhiteSpace(xr.Value))
+				var level = Enumerable.Concat(new[] { name }, stack);
+				if (reverseHierarchy)
+					level = level.Reverse();
+				var col = string.Join(hierarchySeparator, level);
+				if (!dt.Columns.Contains(col))
+					dt.Columns.Add(col);
+	
+				dataRow.SetField(col, value);
+			};
+	
+			Action<DataRow, XElement, bool> processElement = null;
+			processElement = (dataRow, xe, addToStack) =>
+			{
+				if (includeAttributes && xe.HasAttributes)
 				{
-					var level = stack.TakeWhile(v => !v.Equals(row));
-					if (name != null)
-						level = Enumerable.Concat(new[] { name }, level);
-					if (reverseHierarchy)
-						level = level.Reverse();
-					var col = string.Join(hierarchySeparator, level);
-					if (!dt.Columns.Contains(col))
-						dt.Columns.Add(col);
-
-					if (relatedRow != null)
-						relatedRow.SetField(col, xr.Value);
+					foreach (var attr in xe.Attributes())
+					{
+						processValue("@" + attr.Name.LocalName, dataRow, attr.Value);
+					}
+				}
+				if (!xe.HasElements)
+				{
+					processValue(xe.Name.LocalName, dataRow, xe.Value);
+				}
+				else
+				{
+					foreach (var element in xe.Elements())
+					{
+						if (addToStack)
+							stack.Push(xe.Name.LocalName);
+						processElement(dataRow, element, true);
+						if (addToStack)
+							stack.Pop();
+					}
 				}
 			};
-
-			DataRow currentRow = null;
-			while (xr.Read())
+	
+			foreach (var row in rows)
 			{
-				if (xr.NodeType != XmlNodeType.Comment)
-				{
-					if (xr.NodeType == XmlNodeType.Element)
-					{
-						if (String.IsNullOrEmpty(dt.TableName))
-							dt.TableName = xr.Name;
-
-						if (xr.Name == row)
-						{
-							currentRow = dt.NewRow();
-							dt.Rows.Add(currentRow);
-						}
-						if (currentRow != null)
-							stack.Push(xr.Name);
-					}
-					if (currentRow != null && xr.HasAttributes && includeAttributes)
-					{
-						xr.MoveToFirstAttribute();
-						do
-						{
-							process("@" + xr.Name, currentRow);
-						} while (xr.MoveToNextAttribute());
-						xr.MoveToElement();
-					}
-					if (currentRow != null)
-					{
-						process(null, currentRow);
-						if (xr.NodeType == XmlNodeType.EndElement || xr.IsEmptyElement)
-						{
-							if (xr.Name == row)
-								currentRow = null;
-							if (stack.Any())
-								stack.Pop();
-						}
-					}
-				}
+				var dataRow = dt.NewRow();
+				processElement(dataRow, row, false);
+				dt.Rows.Add(dataRow);
 			}
-			xr.Close();
-
+	
 			if (shortCaptions)
 			{
 				// NOTE: assumes none of the column names include the hierarchySeparator...
-				var cols = dt.Columns.OfType<DataColumn>().Select(dc => new { Column = dc, FullName = dc.ColumnName, ShortName = dc.ColumnName.Split(new [] { hierarchySeparator }, StringSplitOptions.None).First() }).GroupBy(c => c.ShortName).Where(g => g.Count() == 1).Select(g => g.First());
+				var cols = dt.Columns.OfType<DataColumn>().Select(dc => new { Column = dc, FullName = dc.ColumnName, ShortName = dc.ColumnName.Split(new[] { hierarchySeparator }, StringSplitOptions.None).First() }).GroupBy(c => c.ShortName).Where(g => g.CountEquals(1)).Select(g => g.First());
 				foreach (var col in cols)
 					// x col.Column.Caption = col.ShortName;
 					col.Column.ColumnName = col.ShortName;
