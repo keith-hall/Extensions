@@ -244,6 +244,12 @@ namespace HallLibrary.Extensions
 		#endregion
 	
 		#region Data Table Filters
+		/// <summary>
+		/// Filter the specified <see cref="DataTable" /> <paramref name="table" /> into a new <see cref="DataTable" /> using the specified <paramref name="filter" />.
+		/// </summary>
+		/// <param name="table">The <see cref="DataTable" /> to filter.</param>
+		/// <param name="filter">The filter expression.</param>
+		/// <returns>A new <see cref="DataTable" /> containing the filtered rows.</returns>
 		public static DataTable Filter(this DataTable table, string filter)
 		{
 			return table.Filter(table.Select(filter));
@@ -387,6 +393,12 @@ namespace HallLibrary.Extensions
 			return dt;
 		}
 		
+		/// <summary>
+		/// Convert <see cref="Object" /> <paramref name="value" /> to a string that can be safely output in a CSV file.
+		/// </summary>
+		/// <param name="value">The object to convert into it's equivalent/safe representation in CSV.</param>
+		/// <param name="separator">The field separator that will be used in the CSV, so that <paramref name="value" /> can be appropriately escaped.</param>
+		/// <returns><paramref name="value" /> represented in CSV.</returns>
 		public static string GetValueForCSV(object value, string separator)
 		{
 			const string quote = "\"";
@@ -400,6 +412,13 @@ namespace HallLibrary.Extensions
 			});
 		}
 		
+		/// <summary>
+		/// Write the specified <paramref name="values" /> to a CSV file, with an optional line of column <paramref name="headers" />.
+		/// </summary>
+		/// <param name="headers">The optional column headings to output as the first line in the CSV output.</param>
+		/// <param name="values">The lines of objects to convert into their equivalent/safe representation in CSV.</param>
+		/// <param name="writer">The <see cref="TextWriter" /> to output the CSV to.</param>
+		/// <param name="separator">The field separator to use in the CSV output.</param>
 		public static void Write(IEnumerable<string> headers, IEnumerable<IEnumerable<object>> values, TextWriter writer, string separator = "\t")
 		{
 			var lines = values.Select(row => string.Join(separator,
@@ -457,12 +476,15 @@ namespace HallLibrary.Extensions
 		}*/
 	}
 	
+	/// <summary>
+	/// Helpers for working with XML documents.
+	/// </summary>
 	public static class XML
 	{
 		/// <summary>
 		/// Iterate through the specified <paramref name="xml" /> and build a <see cref="DataTable" /> from it.
 		/// </summary>
-		/// <param name="xml">The XML element in which to find rows.</param>
+		/// <param name="xml">The XML element in which to find rows.  Rows are taken from the first element in document order that contains multiple child elements.</param>
 		/// <param name="hierarchySeparator">If null, will use short column names, as opposed to the path relative to the row.</param>
 		/// <param name="includeAttributes">Include attributes in the <see cref="DataTable" />.</param>
 		/// <param name="reverseHierarchy">Reverse the order of the column name hierarchy when not using short column names.</param> 
@@ -550,6 +572,9 @@ namespace HallLibrary.Extensions
 		}
 	}
 	
+	/// <summary>
+	/// Helpers for converting values to <see cref="String" /> or from <see cref="String" />.
+	/// </summary>
 	public static class ToOrFromString
 	{
 		/// <summary>
@@ -593,7 +618,12 @@ namespace HallLibrary.Extensions
 			return escapeIfNecessary(value.ToString());
 		}
 		
-		
+		/// <summary>
+		/// Convert <see cref="Object" /> <paramref name="value" /> to a string that can be used in a SQL statement.
+		/// For example, strings are quoted and escaped to prevent SQL injection, dates are converted to an unambiguous format, byte arrays are represented as varbinary etc.
+		/// </summary>
+		/// <param name="value">The object to convert into it's equivalent representation in SQL.</param>
+		/// <returns><paramref name="value" /> represented in SQL.</returns>
 		public static string GetValueForSQL(object value)
 		{
 			return GetValueBase(value, @"null", @"0x", s => {
