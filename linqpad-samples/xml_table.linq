@@ -24,12 +24,7 @@ void Main(string[] args)
 		args = new[] { fd.FileName };
 	}
 	var xe = XElement.Load(args[0]);
-	var row = xe.DescendantsAndSelf().Where(x =>
-	{
-		var l = x.Elements().Select(x2 => x2.Name.LocalName);
-		return l.CountExceeds(1) && l.Distinct().CountEquals(1);
-	}).First().Elements().First().Name.LocalName;
-	var dt = XML.ToDataTable(XmlReader.Create(args[0]), row);
+	var dt = XML.ToDataTable(xe);
 	dt.ConvertColumnsFromString(false);
 	if (args.Length == 2)
 		dt = dt.Filter(args[1]);
