@@ -22,13 +22,16 @@ namespace Tests
 			Assert.AreEqual(dt.TableName, "root");
 			
 			xe = XElement.Parse(@"<root><row><id example='test'>7</id><name><last>Bloggs</last><first>Fred</first></name></row><row><id>6</id><name><first>Joe</first><last>Bloggs</last></name></row></root>");
-			dt = XML.ToDataTable(xe, ".", false, false)
+			dt = XML.ToDataTable(xe, ".", false, false);
 			Assert.IsTrue(dt.Columns.OfType<DataColumn>().Select(c => c.ColumnName).SequenceEqual(new [] { "id", "first.name", "last.name" }));
 			
 			Assert.IsTrue(dt.Rows.GetValuesInColumn(0).SequenceEqual(new [] { "7", "6" }));
 			Assert.IsTrue(dt.Rows.GetValuesInColumn(1).SequenceEqual(new [] { "Fred", "Joe" }));
 			Assert.IsTrue(dt.Rows.GetValuesInColumn(2).SequenceEqual(new [] { "Bloggs", "Bloggs" }));
 			Assert.AreEqual(dt.TableName, "row");
+			
+			dt = XML.ToDataTable(xe, null, false, false);
+			Assert.IsTrue(dt.Columns.OfType<DataColumn>().Select(c => c.ColumnName).SequenceEqual(new [] { "id", "first", "last" }));
 		}
 	}
 }
