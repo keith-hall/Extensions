@@ -33,5 +33,13 @@ namespace Tests
 			dt = XML.ToDataTable(xe, null, false, false);
 			Assert.IsTrue(dt.Columns.OfType<DataColumn>().Select(c => c.ColumnName).SequenceEqual(new [] { "id", "first", "last" }));
 		}
+		
+		[TestMethod]
+		public void TestToDataTableDuplicateColumnNames()
+		{
+			var xe = XElement.Parse(@"<root><row><client><id>1</id><name>Joe Bloggs</name></client><address><id>459</id><country>Ireland</country></address></row><row><client><id>2</id><name>Fred Bloggs</name></client><address><id>214</id><country>Wales</country></address></row></root>");
+			var dt = XML.ToDataTable(xe, null, false, false);
+			Assert.IsTrue(dt.Columns.OfType<DataColumn>().Select(c => c.ColumnName).SequenceEqual(new [] { "id/client", "name", "id/address", "country" }));
+		}
 	}
 }
