@@ -24,6 +24,9 @@ namespace HallLibrary.Extensions {
 		}
 	}
 	
+	/// <summary>
+	/// Contains information about a single event retrieved from a WCF log
+	/// </summary>
 	public struct TraceData
 	{
 		public string Computer;
@@ -37,6 +40,9 @@ namespace HallLibrary.Extensions {
 		public XElement Original;
 	}
 	
+	/// <summary>
+	/// Contains methods for parsing and extracting information from a WCF log
+	/// </summary>
 	public static class TraceHelper {
 		public static IEnumerable<XElement> GetElementsByName<T>(this T source, string name, bool ignoreNamespace = false)
 			where T : XContainer
