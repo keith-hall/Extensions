@@ -105,5 +105,13 @@ namespace Tests
 				Assert.AreEqual(ControlFactory.GetLabel(labels[i]), labels[i + 1]);
 			}
 		}
+		
+		[TestMethod]
+		public void TestReplaceAll()
+		{
+			Assert.AreEqual("hello world this is a test".ReplaceAll(new [] { "l", " is "}, "-"), "he--o wor-d this-a test");
+			Assert.AreEqual("hello world this is a test".ReplaceAll(new [] { "l", " is "}, " is "), "he is  is o wor is d this is a test");
+			Assert.AreEqual("hello world this is a test".ReplaceAll(new [] { "is", "test"}, "this"), "hello world ththis this a this");
+		}
 	}
 }
