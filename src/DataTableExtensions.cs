@@ -570,10 +570,9 @@ namespace HallLibrary.Extensions
 			if (shortCaptions)
 			{
 				// NOTE: assumes none of the column names include the hierarchySeparator...
-				var cols = dt.Columns.OfType<DataColumn>().Select(dc => new { Column = dc, FullName = dc.ColumnName, ShortName = dc.ColumnName.Split(new[] { hierarchySeparator }, StringSplitOptions.None).First() }).GroupBy(c => c.ShortName).Where(g => g.CountEquals(1)).Select(g => g.First());
-				foreach (var col in cols)
-					// x col.Column.Caption = col.ShortName;
-					col.Column.ColumnName = col.ShortName;
+				var cols = dt.Columns.OfType<DataColumn>().Select(dc => new { Column = dc, FullName = dc.ColumnName, ShortName = dc.ColumnName.Split(new[] { hierarchySeparator }, StringSplitOptions.None) }).GroupBy(c => reverseHierarchy ? c.ShortName.Last() : c.ShortName.First()).Where(g => g.CountEquals(1)).Select(g => new { Col = g.First(), ShortName = g.Key });
+				foreach (var g in cols)
+					g.Col.Column.ColumnName = g.ShortName;
 			}
 			return dt;
 		}
