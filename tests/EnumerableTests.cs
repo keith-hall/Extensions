@@ -15,7 +15,7 @@ namespace Tests
 		{
 			var src = Enumerable.Range(1, 4).Concat(new[] { 0 }).Select(s => 1 / s);
 			// ReSharper disable once PossibleMultipleEnumeration
-			Assert.AreEqual(src.CountExceeds(3), true);
+			Assert.IsTrue(src.CountExceeds(3));
 
 			// just doing a Count would give a DivideByZero exception - this could also be demonstrated with the [ExpectedException(typeof(DivideByZeroException))] attribute on this method, but we want to test multiple conditions in a single method
 			try
@@ -38,6 +38,16 @@ namespace Tests
 			
 			src = Enumerable.Range(1, 2);
 			Assert.IsFalse(src.CountExceeds(2));
+		}
+		
+		[TestMethod]
+		public void TestCountEquals()
+		{
+			var src = Enumerable.Range(1, 3).Concat(Enumerable.Range(0, 1).Select(s => 1 / s));
+			Assert.IsFalse(src.Distinct().CountEquals(2));
+			
+			var src = Enumerable.Range(1, 3);
+			Assert.IsTrue(src.CountEquals(3));
 		}
 	}
 }
