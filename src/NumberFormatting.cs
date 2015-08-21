@@ -3,6 +3,9 @@ using System;
 
 namespace HallLibrary.Extensions
 {
+	/// <summary>
+	/// Contains methods useful for formatting numbers in <see cref="String" />s.
+	/// </summary>
 	public static class NumberFormatting
 	{
 		private static readonly Regex _number = new Regex(@"^-?\d+(?:" + _defaultDecimalSeparatorForRegex + @"\d+)?$"); // TODO: replace dot with decimal separator from current culture
@@ -10,11 +13,23 @@ namespace HallLibrary.Extensions
 		private const char _defaultThousandsSeparator = ',';
 		private const string _defaultDecimalSeparatorForRegex = @"\.";
 		
+		/// <summary>
+		/// Determine if the specified <see cref="String" /> <paramref name="value" /> is a number.
+		/// </summary>
+		/// <param name="value">The string to check.</param>
+		/// <returns>True if <paramref name="value" /> is a valid number, False if not.</returns>
 		public static bool IsValidNumber (string value)
 		{
 			return _number.IsMatch(value);
 		}
 		
+		/// <summary>
+		/// Format the number in the <see cref="String" /> <paramref name="number" /> by adding thousand separators.
+		/// </summary>
+		/// <param name="number">The string to format.</param>
+		/// <param name="thousandsSeparator">The separator to use.</param>
+		/// <returns><paramref name="number" /> formatted with thousand separators.</returns>
+		/// <exception cref="ArgumentException"><paramref name="number" /> is not a valid number.</exception>
 		public static string AddThousandsSeparators (string number, string thousandsSeparator = null)
 		{
 			if (!IsValidNumber(number))
