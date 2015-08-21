@@ -2,7 +2,10 @@ using System;
 
 namespace HallLibrary.Extensions
 {
-	public static class RandomExtensionMethods
+	/// <summary>
+	/// Contains extension methods for the <see cref="Random" /> class.
+	/// </summary>
+	public static class RandomExtensions
 	{
 		/// <summary>
 		/// Returns a random long from min (inclusive) to max (exclusive).
