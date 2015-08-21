@@ -532,10 +532,14 @@ namespace HallLibrary.Extensions
 			{
 				if (includeAttributes && xe.HasAttributes)
 				{
+					if (addToStack)
+						stack.Push(xe.Name.LocalName);
 					foreach (var attr in xe.Attributes())
 					{
 						processValue("@" + attr.Name.LocalName, dataRow, attr.Value);
 					}
+					if (addToStack)
+						stack.Pop();
 				}
 				if (!xe.HasElements)
 				{
