@@ -512,7 +512,8 @@ namespace HallLibrary.Extensions
 			bool shortCaptions = (hierarchySeparator == null);
 			hierarchySeparator = hierarchySeparator ?? @"/";
 			var stack = new Stack<string>();
-			var dt = new DataTable(rows.Select(r => r.Name.LocalName).Distinct().CountEquals(1) ? rows.First().Name.LocalName : rows.First().Parent?.Name.LocalName);
+			var rowsAllWithSameName = rows.Select(r => r.Name.LocalName).Distinct().CountEquals(1);
+			var dt = new DataTable(rowsAllWithSameName ? rows.First().Name.LocalName : rows.First().Parent?.Name.LocalName);
 	
 			Action<string, DataRow, string> processValue = (name, dataRow, value) =>
 			{
@@ -556,6 +557,8 @@ namespace HallLibrary.Extensions
 			foreach (var row in rows)
 			{
 				var dataRow = dt.NewRow();
+				if (!rowsAllWithSameName)
+					processValue("#row", dataRow, row.Name.LocalName);
 				processElement(dataRow, row, false);
 				dt.Rows.Add(dataRow);
 			}
