@@ -46,7 +46,7 @@ namespace Tests
 			var src = Enumerable.Range(1, 3).Concat(Enumerable.Range(0, 1).Select(s => 1 / s));
 			Assert.IsFalse(src.Distinct().CountEquals(2));
 			
-			var src = Enumerable.Range(1, 3);
+			src = Enumerable.Range(1, 3);
 			Assert.IsTrue(src.CountEquals(3));
 		}
 	}
