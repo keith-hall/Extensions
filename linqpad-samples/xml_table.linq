@@ -12,7 +12,7 @@ void Main(string[] args)
 	{
 		var fd = new OpenFileDialog();
 		fd.CheckFileExists = true;
-		fd.DefaultExt = "*.xml|XML Files";
+		fd.Filter = "*.xml|XML files";
 		
 		var cached = AppDomain.CurrentDomain.GetData(nameof(fd.FileName));
 		fd.FileName = (string)cached;
