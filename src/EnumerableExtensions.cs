@@ -143,19 +143,7 @@ namespace HallLibrary.Extensions
 		/// <param name="dense">Whether or not to leave gaps in the ranking.</param>
 		/// <returns>The flattened sequence of <paramref name="groupedItems" /> with a rank for each element in the sequence.</returns>
 		public static IEnumerable<Tuple<TKey, int, TValue>> Rank<TKey, TValue> (this IEnumerable<IGrouping<TKey, TValue>> groupedItems, bool dense) {
-			var rank = 1;
-			foreach (var grp in groupedItems)
-			{
-				var groupRank = rank;
-				foreach (var item in grp)
-				{
-					yield return Tuple.Create(grp.Key, groupRank, item);
-					if (!dense)
-						rank++;
-				}
-				if (dense)
-					rank++;
-			}
+			return RankGroup(grouping, dense).SelectMany(r => r.Item1.Select(i => Tuple.Create(r.Item1.Key, r.Item2, i)));
 		}
 	
 		/// <summary>
