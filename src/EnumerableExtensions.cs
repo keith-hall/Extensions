@@ -135,5 +135,47 @@ namespace HallLibrary.Extensions
 			
 			return items.OrderBy(i => regex.Replace(selector(i), match => match.Value.PadLeft(maxDigits, '0')), stringComparer ?? StringComparer.CurrentCulture);
 		}
+		
+		/// <summary>
+		/// Ranks the specified sequence of <paramref name="groupedItems" />, flattening the group.
+		/// </summary>
+		/// <param name="groupedItems">The sequence of items to sort.</param>
+		/// <param name="dense">Whether or not to leave gaps in the ranking.</param>
+		/// <returns>The flattened sequence of <paramref name="groupedItems" /> with a rank for each element in the sequence.</returns>
+		public static IEnumerable<Tuple<TKey, int, TValue>> Rank<TKey, TValue> (this IEnumerable<IGrouping<TKey, TValue>> groupedItems, bool dense) {
+			var rank = 1;
+			foreach (var grp in groupedItems)
+			{
+				var groupRank = rank;
+				foreach (var item in grp)
+				{
+					yield return Tuple.Create(grp.Key, groupRank, item);
+					if (!dense)
+						rank++;
+				}
+				if (dense)
+					rank++;
+			}
+		}
+	
+		/// <summary>
+		/// Ranks the specified sequence of <paramref name="groupedItems" />, keeping the group.
+		/// </summary>
+		/// <param name="groupedItems">The sequence of items to sort.</param>
+		/// <returns>The sequence of <paramref name="groupedItems" /> with a rank for each element in the sequence.</returns>
+		public static IEnumerable<Tuple<IGrouping<TKey, TValue>, int>> RankGroup<TKey, TValue>(this IEnumerable<IGrouping<TKey, TValue>> groupedItems)
+		{
+			return RankGroup(groupedItems, false); // default to false for density because if desired, can just use a Select overload with index
+		}
+	
+		private static IEnumerable<Tuple<IGrouping<TKey, TValue>, int>> RankGroup<TKey, TValue>(this IEnumerable<IGrouping<TKey, TValue>> groupedItems, bool dense)
+		{
+			var rank = 1;
+			foreach (var grp in groupedItems)
+			{
+				yield return Tuple.Create(grp, rank);
+				rank += dense ? 1 : grp.Count();
+			}
+		}
 	}
 }
