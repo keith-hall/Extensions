@@ -137,7 +137,7 @@ namespace HallLibrary.Extensions
 		}
 		
 		/// <summary>
-		/// Ranks the specified sequence of <paramref name="groupedItems" />, flattening the group.
+		/// Ranks the specified sequence of <paramref name="groupedItems" />, flattening the groupings.
 		/// </summary>
 		/// <param name="groupedItems">The sequence of items to sort.</param>
 		/// <param name="dense">Whether or not to leave gaps in the ranking.</param>
