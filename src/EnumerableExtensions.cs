@@ -141,24 +141,26 @@ namespace HallLibrary.Extensions
 		/// </summary>
 		/// <param name="groupedItems">The sequence of items to sort.</param>
 		/// <param name="dense">Whether or not to leave gaps in the ranking.</param>
+		/// <param name="projection">The projection to apply to the items in the sequence combined with the rank.</param>
 		/// <returns>The flattened sequence of <paramref name="groupedItems" /> with a rank for each element in the sequence.</returns>
-		public static IEnumerable<Tuple<TKey, int, TValue>> Rank<TKey, TValue> (this IEnumerable<IGrouping<TKey, TValue>> groupedItems, bool dense) {
+		/// <remarks>If desired, the results can be re-grouped again using GroupBy.</remarks>
+		public static IEnumerable<TResult> Rank<TKey, TValue, TResult> (this IEnumerable<IGrouping<TKey, TValue>> groupedItems, bool dense, Func<TKey, TValue, int, TResult> projection) {
 			var rank = 1;
 			foreach (var grp in groupedItems)
 			{
 				var groupRank = rank;
 				foreach (var item in grp)
 				{
-					yield return Tuple.Create(grp.Key, groupRank, item);
+					yield return projection(grp.Key, item, groupRank);
 					if (!dense)
 						rank++;
 				}
 				if (dense)
 					rank++;
 			}
-			//return RankGroup(groupedItems, dense).SelectMany(r => r.Item1.Select(i => Tuple.Create(r.Item1.Key, r.Item2, i)));
 		}
-	
+		
+		/*// NOTE: disabled due to being able to use GroupBy on the flattened Rank sequence
 		/// <summary>
 		/// Ranks the specified sequence of <paramref name="groupedItems" />, keeping the group.
 		/// </summary>
@@ -177,6 +179,6 @@ namespace HallLibrary.Extensions
 				yield return Tuple.Create(grp, rank);
 				rank += dense ? 1 : grp.Count();
 			}
-		}
+		}*/
 	}
 }
