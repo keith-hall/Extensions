@@ -54,10 +54,14 @@ namespace HallLibrary.Extensions
 		/// <returns>Returns <c>true</c> if the number of elements in the <paramref name="enumerable"/> exceeds the specified <paramref name="count"/>.</returns>
 		public static bool CountExceeds<T>(this IEnumerable<T> enumerable, int count)
 		{
+			int countToCheck;
 			if (enumerable is IQueryable<T>)
-				return ((IQueryable<T>)enumerable).Take(count + 1).Count() > count;
+				countToCheck = ((IQueryable<T>)enumerable).Take(count + 1).Count();
+			else if (enumerable is IList<T>)
+				countToCheck = ((IList<T>)enumerable).Count;
 			else
-				return enumerable.Take(count + 1).Count() > count;
+				countToCheck = enumerable.Take(count + 1).Count();
+			return countToCheck > count;
 		}
 		
 		/// <summary>
@@ -72,10 +76,14 @@ namespace HallLibrary.Extensions
 			// note that this works because if there are more items than count, we just take one extra and compare it, which will return false
 			// if there are less items, it will return false
 			// and if there are count items, it can only take count, so the comparison will succeed
+			int countToCheck;
 			if (enumerable is IQueryable<T>)
-				return ((IQueryable<T>)enumerable).Take(count + 1).Count() == count;
+				countToCheck = ((IQueryable<T>)enumerable).Take(count + 1).Count();
+			else if (enumerable is IList<T>)
+				countToCheck = ((IList<T>)enumerable).Count;
 			else
-				return enumerable.Take(count + 1).Count() == count;
+				countToCheck = enumerable.Take(count + 1).Count();
+			return countToCheck == count;
 		}
 		
 		
@@ -88,10 +96,14 @@ namespace HallLibrary.Extensions
 		/// <returns>Returns <c>true</c> if the number of elements in the <paramref name="enumerable"/> is less than the specified <paramref name="count"/>.</returns>
 		public static bool CountIsLessThan<T>(this IEnumerable<T> enumerable, int count)
 		{
+			int countToCheck;
 			if (enumerable is IQueryable<T>)
-				return ((IQueryable<T>)enumerable).Take(count).Count() < count;
+				countToCheck = ((IQueryable<T>)enumerable).Take(count).Count();
+			else if (enumerable is IList<T>)
+				countToCheck = ((IList<T>)enumerable).Count;
 			else
-				return enumerable.Take(count).Count() < count;
+				countToCheck = enumerable.Take(count).Count();
+			return countToCheck < count;
 		}
 		#endregion
 
