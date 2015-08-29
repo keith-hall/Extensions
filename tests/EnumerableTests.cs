@@ -52,11 +52,27 @@ namespace Tests
 		}
 		
 		[TestMethod]
-		public void TestDistinct()
+		public void TestCountEqualsWithDistinct()
 		{
 			// show that Distinct does not iterate through all elements before returning elements
 			Assert.IsFalse(_failAtFifthIteration.Distinct().CountEquals(2));
 			Assert.IsTrue(_threeElements.Distinct().CountEquals(3));
+		}
+		
+		[TestMethod]
+		public void TestGroupRank()
+		{
+			var scores = new object[] { "Jane", 18, "Joe", 12, "Fred", 18, "Jill", 21, "Jim", 15 };
+			var zipped = scores.OfType<string>().Zip(scores.OfType<int>(), Tuple.Create);
+			
+			var grouped = zipped.GroupBy(t => t.Item2).OrderByDescending(g => g.Key);
+			var ranked = grouped.Rank(false, Tuple.Create);
+			Assert.IsTrue(ranked.Select(t => t.Item3).SequenceEqual(new[] { 1, 2, 2, 4, 5 }));
+			//Assert.IsTrue(ranked.Select(t => t.Item2.Item1).SequenceEqual(new[] { "Jill", "Jane", "Fred", "Jim", "Joe" }));
+			
+			ranked = grouped.Rank(true, Tuple.Create);
+			Assert.IsTrue(ranked.Select(t => t.Item3).SequenceEqual(new[] { 1, 2, 2, 3, 4 }));
+			//Assert.IsTrue(ranked.Select(t => t.Item2.Item1).SequenceEqual(new[] { "Jill", "Jane", "Fred", "Jim", "Joe" }));
 		}
 	}
 }
