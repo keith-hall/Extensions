@@ -149,6 +149,39 @@ namespace HallLibrary.Extensions
 		}
 		
 		/// <summary>
+		/// Convert the specified sequence of <paramref name="items" /> to a <see cref="DataTable" />.
+		/// </summary>
+		/// <typeparam name="T">The type of the elements in the sequence of <paramref name="items" />.</typeparam>
+		/// <param name="items">The sequence of items to convert.</param>
+		/// <returns>A <see cref="DataTable" /> populated with <paramref name="items" />, where the properties are used as column headings.</returns>
+		public static DataTable ToDataTable<T>(this IEnumerable<T> items) where T : class
+		{
+			var table = new DataTable(typeof(T).Name);
+			var props = typeof(T).GetProperties().Where(p => !p.GetIndexParameters().Any()).ToArray();
+			// add the properties as columns to the datatable
+			foreach (var prop in props)
+			{
+				Type propType = prop.PropertyType;
+				
+				// if it is a nullable type, get the underlying type 
+				if (propType.IsGenericType && propType.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
+					propType = Nullable.GetUnderlyingType(propType);
+				
+				table.Columns.Add(prop.Name, propType);
+			}
+			
+			table.BeginLoadData();
+			// add the property values as rows to the datatable
+			foreach (var item in items)
+			{
+				table.Rows.Add(props.Select(p => p.GetValue(item)).ToArray());
+			}
+			table.EndLoadData();
+			
+			return table;
+		}
+		
+		/// <summary>
 		/// Ranks the specified sequence of <paramref name="groupedItems" />, flattening the groupings.
 		/// </summary>
 		/// <param name="groupedItems">The sequence of items to sort.</param>
