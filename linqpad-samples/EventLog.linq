@@ -10,29 +10,32 @@
 
 void Main(string[] args)
 {
-	string machine;
-	DateTime since;
-	
-	#if CMD
-		// lprun
-		// TODO: read command line arguments
-	#else
+	string machine = Environment.MachineName;
+	DateTime since = DateTime.Now.AddDays(-1).Date; // default to since yesterday midnight
+
+	if (args == null || args.Length == 0)
+	{
 		// LINQPad GUI
-		machine = Environment.MachineName;
-		since = DateTime.Now.AddDays(-1).Date; // default to since yesterday midnight
 		var prompt = new InteractivePrompt();
 		prompt.AddCached("Machine", machine, newValue => machine = newValue);
 		var datepicker = (DateTimePicker)prompt.AddCached("Since", since, newValue => since = newValue);
 		datepicker.CustomFormat = ControlFactory.GetUniversalDateFormat();
 		datepicker.Format = DateTimePickerFormat.Custom;
 		datepicker.MaxDate = DateTime.Now;
-		if (prompt.Prompt() != DialogResult.OK) {
+		if (prompt.Prompt() != DialogResult.OK)
+		{
 			"Query Cancelled!".Dump();
 			return;
 		}
 		if (string.IsNullOrEmpty(machine))
 			machine = "localhost";
-	#endif
+	}
+	else
+	{
+		machine = args[0];
+		if (args.Length > 1)
+			since = DateTime.Parse(args[1]);
+	}
 	
 	var conOpt = new ConnectionOptions();
 	conOpt.Impersonation = ImpersonationLevel.Impersonate;
