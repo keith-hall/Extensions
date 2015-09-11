@@ -45,8 +45,7 @@
 
 #region DataTable From XML
 	XML.ToDataTable(
-		XmlReader.Create(Util.GetFullPath(@"test.xml")),
-		@"User",
+		XElement.Load(Util.GetFullPath(@"test.xml")),
 		"." /* don't shorten column names*/,
 		true /* include attributes */,
 		true /* reverse hierarchy */
