@@ -1,11 +1,14 @@
 <Query Kind="Program">
   <Output>DataGrids</Output>
-  <NuGetReference>HallLibrary.Extensions</NuGetReference>
+  <Reference>&lt;RuntimeDirectory&gt;\Microsoft.VisualBasic.dll</Reference>
+  <Reference>&lt;RuntimeDirectory&gt;\System.Windows.Forms.dll</Reference>
   <Reference>&lt;RuntimeDirectory&gt;\System.Management.dll</Reference>
-  <Namespace>HallLibrary.Extensions</Namespace>
+  <Reference>&lt;RuntimeDirectory&gt;\System.Configuration.Install.dll</Reference>
+  <NuGetReference>HallLibrary.Extensions</NuGetReference>
+  <Namespace>Microsoft.VisualBasic</Namespace>
+  <Namespace>System.Drawing</Namespace>
   <Namespace>System.Management</Namespace>
   <Namespace>System.Windows.Forms</Namespace>
-  <!--<Namespace>Microsoft.VisualBasic</Namespace>-->
 </Query>
 
 void Main(string[] args)
