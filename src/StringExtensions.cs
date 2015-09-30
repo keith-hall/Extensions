@@ -97,6 +97,7 @@ namespace HallLibrary.Extensions
 		#endregion
 
 		#region Text related methods
+		/*//removed due to could be misused - i.e. "CountOccurrences > 2" as opposed to "thestring.AllIndexesOf(find, comparisonType).CountExceeds(2)" - doesn't add enough value to use the shorthand
 		/// <summary>
 		/// Reports the number of times the specified <paramref name="find" /> string occurs in the current <see cref="String" /> object.
 		/// </summary>
@@ -108,6 +109,19 @@ namespace HallLibrary.Extensions
 		public static int CountOccurrences(this string value, string find, StringComparison comparisonType = DefaultStringComparison)
 		{
 			return value.AllIndexesOf(find, comparisonType).Count();
+		}*/
+		
+		/// <summary>
+		/// Reports whether any of the specified <paramref name="find" /> strings occur in the current <see cref="String" /> object.
+		/// </summary>
+		/// <param name="value">The string to search in.</param>
+		/// <param name="find">The strings to seek.</param>
+		/// <param name="comparisonType">One of the enumeration values that specifies the rules for the search.</param>
+		/// <returns>Reports whether any of the specified <paramref name="find" /> strings occur in the current <see cref="String" /> object.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="find" /> is <c>null</c>.</exception>
+		public static bool ContainsAny(this string value, IEnumerable<string> find, StringComparison comparisonType = DefaultStringComparison)
+		{
+			return value.AllIndexesOf(find, comparisonType).CountExceeds(0);
 		}
 
 		/// <summary>
