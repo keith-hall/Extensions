@@ -406,7 +406,7 @@ namespace HallLibrary.Extensions
 				s = s.Replace(Environment.NewLine, " ").Replace("\r", " ").Replace("\n", " "); // remove line breaks, replace with spaces
 				
 				// the following text qualification rules and quote doubling are based on recommendations in RFC 4180
-				var qualify = s.Contains(quote) || s.EndsWith(" ") || s.EndsWith("\t") || (s.IndexOf(separator, StringComparison.InvariantCultureIgnoreCase) > -1); // qualify the text in quotes if it contains a quote, ends in whitespace, or contains the separator
+				var qualify = s.Contains(quote) || s.EndsWith(" ") || s.EndsWith("\t") || s.StartsWith(" ") || s.StartsWith("\t") || (s.IndexOf(separator, StringComparison.InvariantCultureIgnoreCase) > -1); // qualify the text in quotes if it contains a quote, starts or ends in whitespace, or contains the separator
 				
 				return qualify ? (quote + s.Replace(quote, quote + quote) + quote) : s; // to escape a quote, we double it up
 			});
