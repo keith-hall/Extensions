@@ -399,14 +399,15 @@ namespace HallLibrary.Extensions
 		/// <param name="value">The object to convert into it's equivalent/safe representation in CSV.</param>
 		/// <param name="separator">The field separator that will be used in the CSV, so that <paramref name="value" /> can be appropriately escaped.</param>
 		/// <returns><paramref name="value" /> represented in CSV.</returns>
-		public static string GetValueForCSV(object value, string separator)
+		public static string GetValueForCSV(object value, string separator, bool replaceLineBreaks = false)
 		{
 			const string quote = "\"";
 			return ToOrFromString.GetValueBase(value, string.Empty, string.Empty, s => {
-				s = s.Replace(Environment.NewLine, " ").Replace("\r", " ").Replace("\n", " "); // remove line breaks, replace with spaces
+				if (replaceLineBreaks)
+					s = s.Replace(Environment.NewLine, " ").Replace("\r", " ").Replace("\n", " "); // remove line breaks, replace with spaces
 				
 				// the following text qualification rules and quote doubling are based on recommendations in RFC 4180
-				var qualify = s.Contains(quote) || s.EndsWith(" ") || s.EndsWith("\t") || s.StartsWith(" ") || s.StartsWith("\t") || (s.IndexOf(separator, StringComparison.InvariantCultureIgnoreCase) > -1); // qualify the text in quotes if it contains a quote, starts or ends in whitespace, or contains the separator
+				var qualify = s.Contains(quote) || s.EndsWith(" ") || s.EndsWith("\t") || s.StartsWith(" ") || s.StartsWith("\t") || (s.IndexOf("\n", StringComparison.InvariantCultureIgnoreCase) > -1) || (s.IndexOf(separator, StringComparison.InvariantCultureIgnoreCase) > -1); // qualify the text in quotes if it contains a quote, starts or ends in whitespace, or contains the separator or a newline
 				
 				return qualify ? (quote + s.Replace(quote, quote + quote) + quote) : s; // to escape a quote, we double it up
 			});
