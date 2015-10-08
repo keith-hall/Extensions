@@ -139,7 +139,7 @@ namespace HallLibrary.Extensions
 		/// <param name="stringComparer">The <see cref="StringComparer" /> to use when comparing values for sorting.</param>
 		/// <returns>A naturally sorted sequence of <paramref name="items" />.</returns>
 		public static IEnumerable<T> OrderByNatural<T>(this IEnumerable<T> items, Func<T, string> selector, StringComparer stringComparer = null)
-		{
+		{ // modified from http://stackoverflow.com/a/11720793/4473405
 			var regex = new Regex(@"\d+", RegexOptions.Compiled);
 			
 			int maxDigits = items
