@@ -38,11 +38,11 @@ namespace Tests
 											}));
 		}
 
-		[TestMethod]
+		/*[TestMethod]
 		public void TestCountOccurences()
 		{
 			Assert.AreEqual(@"hello world".CountOccurrences(@"l"), 3);
-		}
+		}*/
 
 		[TestMethod]
 		public void TestTextBefore()
