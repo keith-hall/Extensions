@@ -182,6 +182,27 @@ namespace HallLibrary.Extensions
 			return table;
 		}
 		
+		// http://stackoverflow.com/a/5729893/4473405
+		// For completeness, this is two methods to ensure that the null check 
+		// is done eagerly while the loop is done lazily
+		public static IEnumerable<T> ConsecutiveDistinct<T>(this IEnumerable<T> input) {
+			if (input == null)
+				throw new ArgumentNullException("input");
+			return ConsecutiveDistinctImpl(input);
+		}
+		
+		private static IEnumerable<T> ConsecutiveDistinctImpl<T>(this IEnumerable<T> input) {
+			bool isFirst = true;
+			T last = default(T);
+			foreach (var item in input) {
+				if (isFirst || !object.Equals(item, last)) {
+					yield return item;
+					last = item;
+					isFirst = false;
+				}
+			}
+		}
+		
 		/// <summary>
 		/// Ranks the specified sequence of <paramref name="groupedItems" />, flattening the groupings.
 		/// </summary>
