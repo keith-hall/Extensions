@@ -182,13 +182,13 @@ namespace HallLibrary.Extensions
 			return table;
 		}
 		
-		// http://stackoverflow.com/a/5729893/4473405
+		// modified from http://stackoverflow.com/a/5729893/4473405
 		// For completeness, this is two methods to ensure that the null check 
 		// is done eagerly while the loop is done lazily
-		public static IEnumerable<T> ConsecutiveDistinct<T, TKey>(this IEnumerable<T> input, Func<T, TKey> keySelector = null) {
+		public static IEnumerable<T> ConsecutiveDistinct<T, TKey>(this IEnumerable<T> input, Func<T, TKey> keySelector) {
 			if (input == null)
 				throw new ArgumentNullException("input");
-			return ConsecutiveDistinctImpl(input, keySelector ?? v => v);
+			return ConsecutiveDistinctImpl(input, keySelector);
 		}
 		
 		private static IEnumerable<T> ConsecutiveDistinctImpl<T, TKey>(this IEnumerable<T> input, Func<T, TKey> keySelector) {
