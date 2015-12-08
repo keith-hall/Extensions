@@ -191,13 +191,14 @@ namespace HallLibrary.Extensions
 			return ConsecutiveDistinctImpl(input);
 		}
 		
-		private static IEnumerable<T> ConsecutiveDistinctImpl<T>(this IEnumerable<T> input) {
+		private static IEnumerable<T> ConsecutiveDistinctImpl<T, TKey>(this IEnumerable<T> input, Func<T, TKey> keySelector) {
 			bool isFirst = true;
-			T last = default(T);
+			TKey last = default(TKey);
 			foreach (var item in input) {
-				if (isFirst || !object.Equals(item, last)) {
+				var key = keySelector(item);
+				if (isFirst || !object.Equals(key, last)) {
 					yield return item;
-					last = item;
+					last = key;
 					isFirst = false;
 				}
 			}
