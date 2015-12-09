@@ -20,6 +20,8 @@ namespace HallLibrary.Extensions
 		/// <returns>An enumerable containing the same elements but in a random order.</returns>
 		public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException(nameof(source));
 			return Shuffle(source, new Random());
 		}
 
@@ -31,6 +33,15 @@ namespace HallLibrary.Extensions
 		/// <param name="random">The random seed to use.</param>
 		/// <returns>An enumerable containing the same elements but in a random order.</returns>
 		public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source, Random random)
+		{ // http://stackoverflow.com/questions/1287567/is-using-random-and-orderby-a-good-shuffle-algorithm
+			if (source == null)
+				throw new ArgumentNullException(nameof(source));
+			if (random == null)
+				throw new ArgumentNullException(nameof(random));
+			return ShuffleImpl(source, random);
+		}
+		
+		private static IEnumerable<T> ShuffleImpl<T>(this IEnumerable<T> source, Random random)
 		{ // http://stackoverflow.com/questions/1287567/is-using-random-and-orderby-a-good-shuffle-algorithm
 			var elements = source.ToArray();
 			for (var i = elements.Length - 1; i >= 0; i--)
@@ -182,15 +193,19 @@ namespace HallLibrary.Extensions
 			return table;
 		}
 		
-		// modified from http://stackoverflow.com/a/5729893/4473405
+		public static IEnumerable<T> ConsecutiveDistinct<T>(this IEnumerable<T> input) {
+			return ConsecutiveDistinct(input, v => v);
+		}
+		
 		// For completeness, this is two methods to ensure that the null check 
 		// is done eagerly while the loop is done lazily
 		public static IEnumerable<T> ConsecutiveDistinct<T, TKey>(this IEnumerable<T> input, Func<T, TKey> keySelector) {
 			if (input == null)
-				throw new ArgumentNullException("input");
+				throw new ArgumentNullException(nameof(input));
 			return ConsecutiveDistinctImpl(input, keySelector);
 		}
 		
+		// modified from http://stackoverflow.com/a/5729893/4473405
 		private static IEnumerable<T> ConsecutiveDistinctImpl<T, TKey>(this IEnumerable<T> input, Func<T, TKey> keySelector) {
 			bool isFirst = true;
 			TKey last = default(TKey);
@@ -213,6 +228,14 @@ namespace HallLibrary.Extensions
 		/// <returns>The flattened sequence of <paramref name="groupedItems" /> with a rank for each element in the sequence.</returns>
 		/// <remarks>If desired, the results can be re-grouped again using GroupBy.</remarks>
 		public static IEnumerable<TResult> Rank<TKey, TValue, TResult> (this IEnumerable<IGrouping<TKey, TValue>> groupedItems, bool dense, Func<TKey, TValue, int, TResult> projection) {
+			if (groupedItems == null)
+				throw new ArgumentNullException(nameof(groupedItems));
+			if (projection == null)
+				throw new ArgumentNullException(nameof(projection));
+			return RankImpl(groupedItems, dense, projection);
+		}
+		
+		private static IEnumerable<TResult> RankImpl<TKey, TValue, TResult> (this IEnumerable<IGrouping<TKey, TValue>> groupedItems, bool dense, Func<TKey, TValue, int, TResult> projection) {
 			var rank = 1;
 			foreach (var grp in groupedItems)
 			{
