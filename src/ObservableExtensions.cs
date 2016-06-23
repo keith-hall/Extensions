@@ -22,7 +22,7 @@ namespace HallLibrary.Extensions
 				(previous, current) => Tuple.Create(previous.Item2, current))
 				.Select(t => projection(t.Item1, t.Item2));
 		}
-		
+		/*
 		/// <summary>
 		/// Ensure that the subscription to the <paramref name="observable" /> is re-subscribed to on error.
 		/// </summary>
@@ -37,6 +37,6 @@ namespace HallLibrary.Extensions
 			Action sub = null;
 			sub = () => observable.Subscribe(onNext, ex => { onError(ex); observable = observable.DelaySubscription(delayAfterError); sub(); });
 			sub();
-		}
+		}*/
 	}
 }
