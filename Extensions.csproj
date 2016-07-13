@@ -73,6 +73,7 @@
     <Compile Include="src\WcfConsumerExtensions.cs" />
     <Compile Include="src\NumberFormatting.cs" />
     <Compile Include="src\RandomExtensions.cs" />
+    <Compile Include="src\WinForms.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
