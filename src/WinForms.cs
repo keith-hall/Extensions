@@ -87,4 +87,28 @@ namespace HallLibrary.Extensions
 			base.WndProc(ref m);
 		}
 	}
+	
+	/*
+	class DraggableForm : Form
+	{
+		protected override void WndProc(ref Message m)
+		{
+			const UInt32 WM_NCHITTEST = 0x0084;
+			const UInt32 HTCAPTION = 0x2;
+			
+			bool handled = false;
+			if (m.Msg == WM_NCHITTEST)
+			{
+				if (this.PointToClient(Cursor.Position).X > 50) // example - only allow dragging if the X (client) co-ordinate is greater than 50
+				{
+					m.Result = (IntPtr)HTCAPTION;
+					handled = true;
+				}
+			}
+			
+			if (!handled)
+				base.WndProc(ref m);
+		}
+	}
+	*/
 }
