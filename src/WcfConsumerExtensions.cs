@@ -194,13 +194,13 @@ namespace HallLibrary.Extensions {
 			} while (xr.ReadToNextSibling("E2ETraceEvent"));
 		}
 		
-		public static void FilterTracesFromFile(string inputPath, Func<TraceData, bool> filter, string outputPath)
+		public static void WriteTracesToFile(string outputPath, IEnumerable<TraceData> traces)
 		{
 			using (var file = XmlWriter.Create(outputPath, new XmlWriterSettings { ConformanceLevel = ConformanceLevel.Fragment }))
 			{
 				try
 				{
-					foreach (var trace in ReadTracesFromFile(inputPath).Where(filter).Select(td => td.Original))
+					foreach (var trace in traces.Select(td => td.Original ?? td.Content))
 					{
 						trace.WriteTo(file);
 					}
@@ -210,6 +210,11 @@ namespace HallLibrary.Extensions {
 					file.Close();
 				}
 			}
+		}
+		
+		public static void FilterTracesFromFile(string inputPath, Func<TraceData, bool> filter, string outputPath)
+		{
+			WriteTracesToFile(outputPath, ReadTracesFromFile(inputPath).Where(filter));
 		}
 	}
 }
