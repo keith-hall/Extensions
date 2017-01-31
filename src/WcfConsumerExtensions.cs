@@ -153,14 +153,8 @@ namespace HallLibrary.Extensions {
 		
 		private static string[] skipMessageTypes = new[] { "System.ServiceModel.Channels.NullMessage", "System.ServiceModel.Description.ServiceMetadataExtension+HttpGetImpl+MetadataOnHelpPageMessage" };
 		private static string[] skipActions = new[] { "http://tempuri.org/IConnectionRegister/", "http://schemas.xmlsoap.org/" };
-		
+				
 		public static IEnumerable<TraceData> ReadTracesFromFile(string path)
-		{
-			XmlException exception = null;
-			return ReadTracesFromFile(path, out exception);
-		}
-		
-		public static IEnumerable<TraceData> ReadTracesFromFile(string path, out XmlException exception)
 		{
 			var xr = XmlTextReader.Create(path, new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment });
 			
@@ -189,7 +183,10 @@ namespace HallLibrary.Extensions {
 						if (traceData.HasValue)
 							yield return traceData.Value;
 					} else {
-						exception = xe;
+						var exceptionInfo = new TraceData();
+						exceptionInfo.Content = new XElement("Exception");
+						exceptionInfo.Content.Value = xe.ToString();
+						yield return exceptionInfo;
 						break;
 					}
 					
