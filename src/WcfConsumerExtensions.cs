@@ -156,8 +156,14 @@ namespace HallLibrary.Extensions {
 		
 		public static IEnumerable<TraceData> ReadTracesFromFile(string path)
 		{
+			XmlException exception = null;
+			return ReadTracesFromFile(path, out exception);
+		}
+		
+		public static IEnumerable<TraceData> ReadTracesFromFile(string path, out XmlException exception)
+		{
 			var xr = XmlTextReader.Create(path, new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment });
-	
+			
 			xr.Read();
 			do
 			{
@@ -166,11 +172,27 @@ namespace HallLibrary.Extensions {
 					var xdr = xr.ReadSubtree();
 					
 					xdr.Read();
-					var xd = (XElement)XDocument.ReadFrom(xdr);
-					var traceData = ParseTraceData(xd);
+					XElement xd = null;
+					XmlException xe = null;
+					try
+					{
+						xd = (XElement)XDocument.ReadFrom(xdr);
+					}
+					catch (XmlException e)
+					{
+						xe = e;
+					}
+					if (xe == null)
+					{
+						var traceData = ParseTraceData(xd);
+						
+						if (traceData.HasValue)
+							yield return traceData.Value;
+					} else {
+						exception = xe;
+						break;
+					}
 					
-					if (traceData.HasValue)
-						yield return traceData.Value;
 				}
 			} while (xr.ReadToNextSibling("E2ETraceEvent"));
 		}
