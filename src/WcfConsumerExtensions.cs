@@ -25,25 +25,26 @@ namespace HallLibrary.Extensions {
 	}
 	
 	/// <summary>
-	/// Contains information about a single event retrieved from a WCF log
-	/// </summary>
-	public struct TraceData
-	{
-		public string Computer;
-		public DateTime TimeCreated;
-		public string Action;
-		public string MessageType;
-		public Guid ActivityID;
-		public string Source;
-		public string Address;
-		public XElement Content;
-		public XElement Original;
-	}
-	
-	/// <summary>
 	/// Contains methods for parsing and extracting information from a WCF log
 	/// </summary>
-	public static class TraceHelper {
+	public static class TraceHelper
+	{
+		/// <summary>
+		/// Contains information about a single event retrieved from a WCF log
+		/// </summary>
+		public struct TraceData
+		{
+			public string Computer;
+			public DateTime TimeCreated;
+			public string Action;
+			public string MessageType;
+			public Guid ActivityID;
+			public string Source;
+			public string Address;
+			public XElement Content;
+			public XElement Original;
+		}
+		
 		public static IEnumerable<XElement> GetElementsByName<T>(this T source, string name, bool ignoreNamespace = false)
 			where T : XContainer
 		{
@@ -56,13 +57,13 @@ namespace HallLibrary.Extensions {
 			Func<XElement, bool> where = xe => xe.Name.LocalName == names[1] && (ignoreNamespace || Object.Equals(xe.GetPrefixOfNamespace(xe.Name.NamespaceName), names[0]));
 			return source.Elements().Where(where);
 		}
-	
+		
 		public static XElement GetElementByName<T>(this T source, string name, bool ignoreNamespace = false)
 			where T : XContainer
 		{
 			return source.GetElementsByName(name, ignoreNamespace).FirstOrDefault();
 		}
-	
+		
 		public static IEnumerable<XElement> GetElementsByNameAndNamespace<T>(this T source, string localName, string namespaceURI)
 			where T : XContainer
 		{
@@ -72,20 +73,20 @@ namespace HallLibrary.Extensions {
 			namespaceURI = ensureEndsInSlash(namespaceURI);
 			return source.Elements().Where(where);
 		}
-	
+		
 		public static XElement GetElementByNameAndNamespace<T>(this T source, string localName, string namespaceURI)
 			where T : XContainer
 		{
 			return source.GetElementsByNameAndNamespace(localName, namespaceURI).FirstOrDefault();
 		}
-	
+		
 		public static XAttribute AttributeAnyNS<T>(this T source, string localName)
 			where T : XElement
 		{
 			return source.Attributes().FirstOrDefault(a => a.Name.LocalName == localName);
 		}
 		
-		private static Nullable<TraceData> ParseTraceData (XElement traceEvent)
+		private static Nullable<TraceData> ParseTraceData(XElement traceEvent)
 		{
 			var traceData = new TraceData();
 			traceData.Original = traceEvent;
@@ -94,7 +95,7 @@ namespace HallLibrary.Extensions {
 			traceData.TimeCreated = DateTime.Parse(system.GetElementByName("TimeCreated").AttributeAnyNS("SystemTime").Value);
 			traceData.Computer = system.GetElementByName("Computer").Value;
 			traceData.ActivityID = Guid.Parse(system.GetElementByName("Correlation").AttributeAnyNS("ActivityID").Value);
-	
+			
 			var dataItem = traceEvent.GetElementByName("ApplicationData").GetElementByName("TraceData")?.GetElementByName("DataItem");
 			if (dataItem != null)
 			{
@@ -111,7 +112,7 @@ namespace HallLibrary.Extensions {
 					{
 						traceData.Action = traceRecord.AttributeAnyNS("Severity").Value;
 						traceData.MessageType = "Trace";
-	
+						
 						traceData.Content = traceRecord;
 					}
 					return traceData;
@@ -122,15 +123,13 @@ namespace HallLibrary.Extensions {
 					if (!skipMessageTypes.Contains(traceData.MessageType))
 					{
 						var source = messageLog.AttributeAnyNS("Source").Value;
-	
+						
 						traceData.Source = source;
-	
+						
 						var soapEnvelope = messageLog.GetElementByName("Envelope", true);
 						if (soapEnvelope == null)
 						{
-							#if LINQPAD
-							messageLog.Dump();
-							#endif
+								traceData.Content = messageLog;
 						}
 						else
 						{
@@ -138,11 +137,10 @@ namespace HallLibrary.Extensions {
 							traceData.Action = messageLog.GetElementByName("Addressing")?.GetElementByName("Action").Value ?? header?.GetElementByName("Action", true)?.Value;
 							traceData.Address = header?.GetElementByName("To", true)?.Value;
 							var body = soapEnvelope.GetElementByName("Body", true);
-							if (body != null)
+							if (body != null && body.HasElements)
 								traceData.Content = body.Elements().FirstOrDefault();
-							
 						}
-	
+						
 						if (traceData.Action == null || !skipActions.Any(traceData.Action.StartsWith))
 							return traceData;
 					}
@@ -153,7 +151,7 @@ namespace HallLibrary.Extensions {
 		
 		private static string[] skipMessageTypes = new[] { "System.ServiceModel.Channels.NullMessage", "System.ServiceModel.Description.ServiceMetadataExtension+HttpGetImpl+MetadataOnHelpPageMessage" };
 		private static string[] skipActions = new[] { "http://tempuri.org/IConnectionRegister/", "http://schemas.xmlsoap.org/" };
-				
+		
 		public static IEnumerable<TraceData> ReadTracesFromFile(string path)
 		{
 			var xr = XmlTextReader.Create(path, new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment });
@@ -189,7 +187,7 @@ namespace HallLibrary.Extensions {
 						yield return exceptionInfo;
 						break;
 					}
-					
+		
 				}
 			} while (xr.ReadToNextSibling("E2ETraceEvent"));
 		}
@@ -211,7 +209,7 @@ namespace HallLibrary.Extensions {
 				}
 			}
 		}
-		
+	
 		public static void FilterTracesFromFile(string inputPath, Func<TraceData, bool> filter, string outputPath)
 		{
 			WriteTracesToFile(outputPath, ReadTracesFromFile(inputPath).Where(filter));
