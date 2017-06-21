@@ -187,7 +187,7 @@ namespace HallLibrary.Extensions {
 						yield return exceptionInfo;
 						break;
 					}
-		
+					
 				}
 			} while (xr.ReadToNextSibling("E2ETraceEvent"));
 		}
@@ -209,10 +209,32 @@ namespace HallLibrary.Extensions {
 				}
 			}
 		}
-	
+		
 		public static void FilterTracesFromFile(string inputPath, Func<TraceData, bool> filter, string outputPath)
 		{
 			WriteTracesToFile(outputPath, ReadTracesFromFile(inputPath).Where(filter));
+		}
+		
+		/// <summary>
+		/// Contains information about a request and response pair retrieved from a WCF log
+		/// </summary>
+		public struct MessageData
+		{
+			public TraceData Request;
+			public TraceData Response;
+		}
+		
+		public static IEnumerable<MessageData> ParseMessagesFromFile(string path, DateTime? since = null)
+		{
+			var traces = ReadTracesFromFile(path)
+				.Where(th => th.Source.StartsWith("ServiceLevel") || (th.Source == "TransportSend" && th.MessageType == "System.ServiceModel.Channels.BodyWriterMessage")); // anything at Service Level, and Fault responses, which are Transport level
+			if (since.HasValue)
+				traces = traces.Where(th => th.TimeCreated > since);
+			var grouped = traces.GroupBy(th => th.ActivityID)
+				.Select(g => new MessageData { Request = g.First(th => th.Source.EndsWith("Request")), Response = g.FirstOrDefault(th => th.Source.EndsWith("Reply") || th.Source == "TransportSend") })
+				.Where(rp => rp.Request.ActivityID != null && rp.Response.ActivityID != null) // ignore where a request or response is missing - incomplete data due to WCF service being in use and still writing to log...
+			.OrderBy(rp => rp.Request.TimeCreated);
+			return grouped;
 		}
 	}
 }
