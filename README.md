@@ -1,8 +1,8 @@
 # Extensions
-Useful static or extension methods for working in C# or LINQPad
+Useful static or extension methods for working in .NET (especially LINQPad)
 
 ## DataTable extensions
-In some situations, it can be useful to view an XML file as a table, for example when a webservice returns an array of objects.  While there is a built in function in dot net to read an xml file into a DataSet, it consists of multiple tables with relations, which isn't so easily viewable.
+In some situations, it can be useful to view an XML file as a table, for example when a webservice returns an array of objects.  While there is a built in function in .NET to read an XML file into a `DataSet`, it consists of multiple tables with relations, which isn't so easily viewable.
 For example, the following XML:
 ```xml
 <root>
@@ -42,6 +42,6 @@ XML.ToDataTable(xml: XElement.Load(@"\\path\to\file.xml"), hierarchySeparator: "
 ```
 
 ## String Extensions
-Have you ever noticed that most of the time when doing a String.IndexOf, you almost always want to do some text manipulation.  Maybe you want the text that occurs before the string you are searching for, maybe the text before it, or maybe even the text between another IndexOf.  This is what StringExtensions helps you achieve with TextBefore, TextAfter and TextBetween.  Also, it can be useful to know the number of times a substring appears in a string, for this you can use CountOccurrences.  In addition, you can get all indexes of a substring in a string with AllIndexesOf and you can get all occurrences of text between two strings with AllTextBetween.  If you need all the indexes of multiple substrings, you can use AllSortedIndexesOf.
+Have you ever noticed that most of the time when doing a `String.IndexOf`, you almost always want to do some text manipulation.  Maybe you want the text that occurs before the string you are searching for, maybe the text before it, or maybe even the text between another `IndexOf`.  This is what `StringExtensions` helps you achieve with `TextBefore`, `TextAfter` and `TextBetween`.  Also, it can be useful to know the number of times a substring appears in a string, for this you can use `CountOccurrences`.  In addition, you can get all indexes of a substring in a string with `AllIndexesOf` and you can get all occurrences of text between two strings with `AllTextBetween`.  If you need all the indexes of multiple substrings, you can use `AllSortedIndexesOf`.
 
 [![MyGet Build Status](https://www.myget.org/BuildSource/Badge/progamer-me?identifier=4653f437-eca9-4422-9a81-662bceb36acc)](https://www.myget.org/)
