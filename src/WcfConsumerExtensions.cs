@@ -86,6 +86,9 @@ namespace HallLibrary.Extensions {
 			return source.Attributes().FirstOrDefault(a => a.Name.LocalName == localName);
 		}
 		
+		private static string[] skipMessageTypes = new[] { "System.ServiceModel.Channels.NullMessage", "System.ServiceModel.Description.ServiceMetadataExtension+HttpGetImpl+MetadataOnHelpPageMessage" };
+		private static string[] skipActions = new[] { "http://tempuri.org/IConnectionRegister/", "http://schemas.xmlsoap.org/" };
+		
 		private static Nullable<TraceData> ParseTraceData(XElement traceEvent)
 		{
 			var traceData = new TraceData();
@@ -119,13 +122,15 @@ namespace HallLibrary.Extensions {
 				}
 				else
 				{
-					traceData.MessageType = messageLog.AttributeAnyNS("Type").Value;
-					if (!skipMessageTypes.Contains(traceData.MessageType))
+					traceData.Source = messageLog.AttributeAnyNS("Source")?.Value;
+					traceData.MessageType = messageLog.AttributeAnyNS("Type")?.Value;
+					if (traceData.MessageType == null && traceData.Source == "Malformed")
 					{
-						var source = messageLog.AttributeAnyNS("Source").Value;
-						
-						traceData.Source = source;
-						
+						traceData.Content = messageLog;
+						return traceData;
+					}
+					else if (!skipMessageTypes.Contains(traceData.MessageType))
+					{
 						var soapEnvelope = messageLog.GetElementByName("Envelope", true);
 						if (soapEnvelope == null)
 						{
@@ -148,9 +153,6 @@ namespace HallLibrary.Extensions {
 			}
 			return null;
 		}
-		
-		private static string[] skipMessageTypes = new[] { "System.ServiceModel.Channels.NullMessage", "System.ServiceModel.Description.ServiceMetadataExtension+HttpGetImpl+MetadataOnHelpPageMessage" };
-		private static string[] skipActions = new[] { "http://tempuri.org/IConnectionRegister/", "http://schemas.xmlsoap.org/" };
 		
 		public static IEnumerable<TraceData> ReadTracesFromFile(string path)
 		{
