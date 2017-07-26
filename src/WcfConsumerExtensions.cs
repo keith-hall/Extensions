@@ -124,7 +124,7 @@ namespace HallLibrary.Extensions {
 				{
 					traceData.Source = messageLog.AttributeAnyNS("Source")?.Value;
 					traceData.MessageType = messageLog.AttributeAnyNS("Type")?.Value;
-					if (traceData.MessageType == null && source == "Malformed")
+					if (traceData.MessageType == null && traceData.Source == "Malformed")
 					{
 						traceData.Content = messageLog;
 						return traceData;
