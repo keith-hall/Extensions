@@ -74,6 +74,7 @@
     <Compile Include="src\NumberFormatting.cs" />
     <Compile Include="src\RandomExtensions.cs" />
     <Compile Include="src\WinForms.cs" />
+    <Compile Include="src\StringHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
