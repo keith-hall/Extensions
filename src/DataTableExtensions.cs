@@ -32,6 +32,20 @@ namespace HallLibrary.Extensions
 				separator
 			);
 		}
+		
+		/// <summary>
+		/// Get the contents of the <see cref="DataTable" /> <paramref name="table" /> as a <see cref="String" /> in CSV format.
+		/// </summary>
+		/// <param name="table">The <see cref="DataTable" /> whose contents to write.</param>
+		/// <param name="separator">The field separator to use in the CSV output.</param>
+		/// <param name="includeColumnNamesAsHeader">Whether to include a header row with the column names from the <paramref name="table" /> in the CSV.</param>
+		/// <returns>A <see cref="String" /> containing the data in CSV format.</returns>
+		public static string WriteToCSV(this DataTable table, string separator = "\t", bool includeColumnNamesAsHeader = true)
+		{
+			var sw = new StringWriter();
+			WriteToCSV(table, sw, separator, includeColumnNamesAsHeader);
+			return sw.ToString();
+		}
 		#endregion
 		
 		#region DataRowCollection Extensions
@@ -162,6 +176,13 @@ namespace HallLibrary.Extensions
 		#endregion
 		
 		#region SQL
+		/// <summary>
+		/// Create a SQL "insert" statement for the data in the specified <paramref name="dt" />.
+		/// </summary>
+		/// <param name="dt">The <see cref="DataTable" />s whose data will be written as a SQL "insert" statement.</param>
+		/// <param name="tableName">The name of the table to use in the insert statement.</param>
+		/// <param name="createTable">Whether or not a "CREATE TABLE"/"DECLARE @"... "TABLE" statement should also be written.</param>
+		/// <param name="writer">The <see cref="TextWriter" /> to output the insert statement(s) to.</param>
 		public static void TableToSQLInsert(this DataTable dt, string tableName, bool createTable, TextWriter writer)
 		{
 			Func<string, string> escapeIfNecessary = name => {
@@ -241,6 +262,13 @@ namespace HallLibrary.Extensions
 			}
 			writer.Flush();
 		}
+		
+		public static string TableToSQLInsert(this DataTable dt, string tableName, bool createTable)
+		{
+			var sw = new StringWriter();
+			TableToSQLInsert(dt, tableName, createTable, sw);
+			return sw.ToString();
+		}
 		#endregion
 	
 		#region Data Table Filters
@@ -276,6 +304,8 @@ namespace HallLibrary.Extensions
 
 	public static class CSV
 	{
+		// TODO: add method to read a CSV from a String/StringReader/Pipeline etc.
+		
 		/// <summary>
 		/// Open a CSV file at the specified <paramref name="path" /> using the specified field <paramref name="separator" />.
 		/// </summary>
@@ -305,6 +335,8 @@ namespace HallLibrary.Extensions
 			}
 		}
 		
+		// TODO: add method to determine the separator for a CSV contained in a String/StringReader/Pipeline etc.
+		
 		/// <summary>
 		/// Open the specified CSV file and parse a few rows to determine what field separator is used.
 		/// </summary>
@@ -323,7 +355,7 @@ namespace HallLibrary.Extensions
 				try {
 					c = OpenCSV(path, s).Take(maxLinesToExamine).Select(r => r.Length).Distinct().ToList();
 				} catch (Microsoft.VisualBasic.FileIO.MalformedLineException) {
-					
+					// this is the wrong separator. We will try another one, if there are separators left in the list of possible separators.
 				}
 				return new { Separator = s, Contents = c };
 			}).Where(r => r.Contents != null);
@@ -416,7 +448,7 @@ namespace HallLibrary.Extensions
 		/// <summary>
 		/// Write the specified <paramref name="values" /> to a CSV file, with an optional line of column <paramref name="headers" />.
 		/// </summary>
-		/// <param name="headers">The optional column headings to output as the first line in the CSV output.</param>
+		/// <param name="headers">The optional column headings to output as the first line in the CSV output. Leave null or empty for no headers.</param>
 		/// <param name="values">The lines of objects to convert into their equivalent/safe representation in CSV.</param>
 		/// <param name="writer">The <see cref="TextWriter" /> to output the CSV to.</param>
 		/// <param name="separator">The field separator to use in the CSV output.</param>
