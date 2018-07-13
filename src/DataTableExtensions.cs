@@ -66,6 +66,24 @@ namespace HallLibrary.Extensions
 		}
 		#endregion
 		
+		/* example usage:
+		```cs
+		var a = @"Period	Card Name	Sum	Transaction Count
+		2017-01	Visa Classic	1058.65	348
+		2017-01	Visa Gold	761.00	210
+		2017-01	Visa Gold	1.00	1
+		2017-02	Visa Gold	675.12	78
+		2017-02	Visa Classic	953.87	321
+		2017-03	Other	12.99	1
+		2017-03	Visa Classic	1157.41	401
+		2017-03	Visa Gold	1243.56	245
+		";
+		using (var tr = new StringReader(a)) {
+			var r = HallLibrary.Extensions.CSV.OpenCSV(tr, "\t");
+			var dt = HallLibrary.Extensions.CSV.Load(r).Dump();
+			HallLibrary.Extensions.DataTableExtensions.PivotData(dt, new[] { "Period" }, new[] { "Sum", "Transaction Count" }, (s, o1, o2) => decimal.Parse(o2.ToString()) + ((o1 == null || o1 is DBNull) ? (decimal)0.0 : decimal.Parse(o1.ToString()))).Dump();
+		}
+		*/
 		public static DataTable PivotData(DataTable source, IEnumerable<string> columnsToPivot, IEnumerable<string> columnsToAggregate, Func<string, object, object, object> aggregate)
 		{
 			columnsToPivot = columnsToPivot.ToArray();
