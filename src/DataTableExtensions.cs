@@ -304,21 +304,44 @@ namespace HallLibrary.Extensions
 
 	public static class CSV
 	{
-		// TODO: add method to read a CSV from a String/StringReader/Pipeline etc.
+		/// <summary>
+		/// Open a CSV file at the specified <paramref name="path" />, automatically determining the field separator.
+		/// </summary>
+		/// <param name="path">The path to the CSV file.</param>
+		/// <returns>An enumerable containing a <see cref="String" /> array all the fields in each row.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="path" /> is null or empty.</exception>
+		/// <exception cref="InvalidDataException">When it is not possible to automatically determine the field separator.</exception>
+		public static IEnumerable<string[]> OpenCSV(string path)
+		{
+			var separator = DetermineCSVSeparator(path);
+			return OpenCSV(path, separator);
+		}
 		
 		/// <summary>
 		/// Open a CSV file at the specified <paramref name="path" /> using the specified field <paramref name="separator" />.
 		/// </summary>
 		/// <param name="path">The path to the CSV file.</param>
-		/// <param name="separator">The field separator to use.  If <c>null</c>, it will attempt to determine the field separator automatically.</param>
+		/// <param name="separator">The field separator to use.</param>
 		/// <returns>An enumerable containing a <see cref="String" /> array all the fields in each row.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="path" /> is null or empty.</exception>
-		/// <exception cref="InvalidDataException">When <paramref name="separator" /> is <c>null</c> and it is unable to automatically determine the field separator.</exception>
-		public static IEnumerable<string[]> OpenCSV(string path, string separator = null)
+		/// <exception cref="ArgumentNullException"><paramref name="path" /> or <paramref name="separator" /> is null or empty.</exception>
+		public static IEnumerable<string[]> OpenCSV(string path, string separator)
+		{
+			using (var reader = new StreamReader(path))
+			{
+				return OpenCSV(reader, separator);
+			}
+		}
+		
+		/// <summary>
+		/// Read the CSV file from the specified <paramref name="reader" /> using the specified field <paramref name="separator" />.
+		/// </summary>
+		/// <param name="reader">The <see cref="TextReader" /> responsible reading the CSV contents.</param>
+		/// <param name="separator">The field separator to use.</param>
+		/// <returns>An enumerable containing a <see cref="String" /> array all the fields in each row.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="reader" /> or <paramref name="separator" /> is null or empty.</exception>
+		public static IEnumerable<string[]> OpenCSV(TextReader reader, string separator)
 		{ //http://msdn.microsoft.com/en-us/library/microsoft.visualbasic.fileio.textfieldparser.aspx
-			if (string.IsNullOrEmpty(separator))
-				separator = DetermineCSVSeparator(path);
-			using (var tfp = new Microsoft.VisualBasic.FileIO.TextFieldParser(path))
+			using (var tfp = new Microsoft.VisualBasic.FileIO.TextFieldParser(reader))
 			{
 				try
 				{
@@ -335,8 +358,6 @@ namespace HallLibrary.Extensions
 			}
 		}
 		
-		// TODO: add method to determine the separator for a CSV contained in a String/StringReader/Pipeline etc.
-		
 		/// <summary>
 		/// Open the specified CSV file and parse a few rows to determine what field separator is used.
 		/// </summary>
@@ -348,12 +369,28 @@ namespace HallLibrary.Extensions
 		{
 			if (System.IO.Path.GetExtension(path).Equals(@".tsv", StringComparison.InvariantCultureIgnoreCase))
 				return "\t";
+			
+			using (var reader = new StreamReader(path))
+			{
+				return DetermineCSVSeparator(reader);
+			}
+		}
+		
+		/// <summary>
+		/// Parse a few rows from the specified CSV to determine what field separator is used.
+		/// </summary>
+		/// <param name="reader">The <see cref="TextReader" /> responsible reading the CSV contents.</param>
+		/// <returns>The field separator used in the specified CSV file.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="TextReader" /> is null or empty.</exception>
+		/// <exception cref="InvalidDataException">When it is unable to automatically determine the field separator.</exception>
+		public static string DetermineCSVSeparator (TextReader reader)
+		{
 			const int maxLinesToExamine = 3;
-			var possibleSeparators = new [] { @",", @";", "\t", @"|", System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator }.Distinct();
+			var possibleSeparators = new [] { "\t", @"|", System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator, @",", @";" }.Distinct();
 			var results = possibleSeparators.Select(s => {
 				List<int> c = null;
 				try {
-					c = OpenCSV(path, s).Take(maxLinesToExamine).Select(r => r.Length).Distinct().ToList();
+					c = OpenCSV(reader, s).Take(maxLinesToExamine).Select(r => r.Length).Distinct().ToList();
 				} catch (Microsoft.VisualBasic.FileIO.MalformedLineException) {
 					// this is the wrong separator. We will try another one, if there are separators left in the list of possible separators.
 				}
@@ -361,13 +398,13 @@ namespace HallLibrary.Extensions
 			}).Where(r => r.Contents != null);
 			var bestMatch = results.SingleOrDefault(r => !r.Contents.CountExceeds(1) && r.Contents.Single() > 1); // if there are multiple distinct values then it can't be the correct field separator, and if it only returns one field then it is also incorrect
 			if (bestMatch == null) // if there are 0 or more than 1 result, we cannot be sure what the correct field separator is
-				throw new InvalidDataException(@"Unable to determine separator for file: " + path);
+				throw new InvalidDataException(@"Unable to automatically determine column separator");
 			
 			return bestMatch.Separator;
 		}
 		
 		/// <summary>
-		/// Open a CSV file <paramref name="path" /> and get it's contents respresented in a <see cref="DataTable" />.
+		/// Open a CSV file <paramref name="path" /> and get it's contents represented in a <see cref="DataTable" />.
 		/// </summary>
 		/// <param name="path">The path to the CSV file.</param>
 		/// <param name="separator">The field separator used in the CSV file.</param>
@@ -378,10 +415,24 @@ namespace HallLibrary.Extensions
 		/// <exception cref="InvalidDataException">A line in the file is malformed and contains too many fields.</exception>
 		public static DataTable Load(string path, string separator = null, bool containsHeaders = true, bool inferTypes = false, bool tolerateMalformedFile = false)
 		{
-			var csv = OpenCSV(path, separator);
-			var dt = new DataTable(path);
+			var csv = separator == null ? OpenCSV(path) : OpenCSV(path, separator);
+			return Load(csv, containsHeaders, inferTypes, tolerateMalformedFile, path);
+		}
+		
+		/// <summary>
+		/// Get the contents of the specified <paramref name="data" /> represented in a <see cref="DataTable" />.
+		/// </summary>
+		/// <param name="data">The data to represent in a <see cref="DataTable" />.</param>
+		/// <param name="containsHeaders">Specifies whether the data contains a header row or not, which will be used to set the DataTable column headings.</param>
+		/// <param name="inferTypes">Specifies whether to attempt to determine the type of each column based on it's contents.  Supports dates and numbers.</param>
+		/// <param name="tolerateMalformedFile">Specifies whether to continue loading the data when some rows are malformed and contain too many fields.</param>
+		/// <returns>A <see cref="DataTable" /> representing the contents of the given <paramref name="data" />.</returns>
+		/// <exception cref="InvalidDataException">A row in the data is malformed and contains too many fields.</exception>
+		public static DataTable Load(IEnumerable<string[]> data, bool containsHeaders = true, bool inferTypes = false, bool tolerateMalformedFile = false, string name = null)
+		{
+			var dt = new DataTable(name);
 			
-			var iterator = csv.GetEnumerator();
+			var iterator = data.GetEnumerator();
 			if (! iterator.MoveNext())
 				return dt;
 			
@@ -411,7 +462,7 @@ namespace HallLibrary.Extensions
 					for (int x = dt.Columns.Count; x < iterator.Current.Length; x++)
 						dt.Columns.Add();
 				} else if (dt.Columns.Count < iterator.Current.Length)
-					throw new InvalidDataException(string.Format(@"Malformed line {0} in CSV '{1}' with separator '{2}'", lineNo, path, separator));
+					throw new InvalidDataException(string.Format(@"Malformed line {0} in data - expected {1} columns, found {2}", lineNo, dt.Columns.Count, iterator.Current.Length));
 				
 				// add the row to the data table
 				dt.Rows.Add(iterator.Current);
