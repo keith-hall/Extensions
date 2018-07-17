@@ -118,6 +118,7 @@ namespace Tests
 		public void TestEmpty()
 		{
 			Assert.AreEqual("    ".NullIfEmpty(true), null);
+			Assert.AreEqual("    ".NullIfEmpty(false), "    ");
 			Assert.AreEqual(((string)null).NullIfEmpty(), null);
 			Assert.AreEqual("hello world this is a test".NullIfEmpty(), "hello world this is a test");
 		}
