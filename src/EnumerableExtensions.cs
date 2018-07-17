@@ -169,7 +169,7 @@ namespace HallLibrary.Extensions
 		public static DataTable ToDataTable<T>(IEnumerable<T> items) where T : class
 		{
 			var table = new DataTable(typeof(T).Name);
-			var props = typeof(T).GetProperties().Where(p => !p.GetIndexParameters().Any() && !p.GetCustomAttributes().Any(a => a is System.Data.Linq.Mapping.AssociationAttribute));
+			var props = typeof(T).GetProperties().Where(p => !p.GetIndexParameters().Any() && !p.GetCustomAttributes(false).Any(a => a is System.Data.Linq.Mapping.AssociationAttribute));
 			var fields = typeof(T).GetFields();
 			var combined = props.Select(p => Tuple.Create<Func<object, object>, string, Type>(p.GetValue, p.Name, p.PropertyType)).Concat(fields.Select(f => Tuple.Create<Func<object, object>, string, Type>(f.GetValue, f.Name, f.FieldType))).ToArray();
 			// add the properties and fields as columns to the datatable
