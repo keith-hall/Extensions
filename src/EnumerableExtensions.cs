@@ -166,7 +166,7 @@ namespace HallLibrary.Extensions
 		/// <typeparam name="T">The type of the elements in the sequence of <paramref name="items" />.</typeparam>
 		/// <param name="items">The sequence of items to convert.</param>
 		/// <returns>A <see cref="DataTable" /> populated with <paramref name="items" />, where the properties and fields are used as column headings.</returns>
-		public static DataTable ToDataTable<T>(IEnumerable<T> items) where T : class
+		public static DataTable ToDataTable<T>(this IEnumerable<T> items) where T : class
 		{
 			var table = new DataTable(typeof(T).Name);
 			var props = typeof(T).GetProperties().Where(p => !p.GetIndexParameters().Any() && !p.GetCustomAttributes(false).Any(a => a is System.Data.Linq.Mapping.AssociationAttribute));
