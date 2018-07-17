@@ -165,31 +165,34 @@ namespace HallLibrary.Extensions
 		/// </summary>
 		/// <typeparam name="T">The type of the elements in the sequence of <paramref name="items" />.</typeparam>
 		/// <param name="items">The sequence of items to convert.</param>
-		/// <returns>A <see cref="DataTable" /> populated with <paramref name="items" />, where the properties are used as column headings.</returns>
-		public static DataTable ToDataTable<T>(this IEnumerable<T> items) where T : class
+		/// <returns>A <see cref="DataTable" /> populated with <paramref name="items" />, where the properties and fields are used as column headings.</returns>
+		public static DataTable ToDataTable<T>(IEnumerable<T> items) where T : class
 		{
 			var table = new DataTable(typeof(T).Name);
-			var props = typeof(T).GetProperties().Where(p => !p.GetIndexParameters().Any()).ToArray();
-			// add the properties as columns to the datatable
-			foreach (var prop in props)
+			var props = typeof(T).GetProperties().Where(p => !p.GetIndexParameters().Any() && !p.GetCustomAttributes().Any(a => a is System.Data.Linq.Mapping.AssociationAttribute));
+			var fields = typeof(T).GetFields();
+			var combined = props.Select(p => Tuple.Create<Func<object, object>, string, Type>(p.GetValue, p.Name, p.PropertyType)).Concat(fields.Select(f => Tuple.Create<Func<object, object>, string, Type>(f.GetValue, f.Name, f.FieldType))).ToArray();
+			// add the properties and fields as columns to the datatable
+			foreach (var prop in combined)
 			{
-				Type propType = prop.PropertyType;
-				
+				Type propType = prop.Item3;
+
 				// if it is a nullable type, get the underlying type 
 				if (propType.IsGenericType && propType.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
 					propType = Nullable.GetUnderlyingType(propType);
-				
-				table.Columns.Add(prop.Name, propType);
+
+				table.Columns.Add(prop.Item2, propType);
 			}
 			
 			table.BeginLoadData();
-			// add the property values as rows to the datatable
+			// for each item, add the property and field values as a row to the datatable
 			foreach (var item in items)
 			{
-				table.Rows.Add(props.Select(p => p.GetValue(item)).ToArray());
+				var values = combined.Select(p => p.Item1(item));
+				table.Rows.Add(values.ToArray());
 			}
 			table.EndLoadData();
-			
+
 			return table;
 		}
 		
