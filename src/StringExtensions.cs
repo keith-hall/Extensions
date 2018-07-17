@@ -228,6 +228,19 @@ namespace HallLibrary.Extensions
 			sb.Append(haystack.Substring(pos, haystack.Length - pos));
 			return sb.ToString();
 		}
+		
+		/// <summary>
+		/// If the given string is empty (or optionally only whitespace), convert it to null to make it easier to use with the null propagating operator etc.
+		/// </summary>
+		/// <param name="str">The string to convert to null if it is empty.</param>
+		/// <param name="whitespaceCountsAsEmpty">When true, if the given string consists only of whitespace, convert it to null.</param>
+		/// <returns>The input string or null if it was empty.</returns>
+		public static string NullIfEmpty(this string str, bool whitespaceCountsAsEmpty = true)
+		{
+			if (string.IsNullOrEmpty(str) || (whitespaceCountsAsEmpty && string.IsNullOrWhiteSpace(str)))
+				return null;
+			return str;
+		}
 		#endregion
 		/*
 		#region SGML

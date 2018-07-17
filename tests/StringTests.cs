@@ -113,5 +113,13 @@ namespace Tests
 			Assert.AreEqual("hello world this is a test".ReplaceAll(new [] { "l", " is "}, " is "), "he is  is o wor is d this is a test");
 			Assert.AreEqual("hello world this is a test".ReplaceAll(new [] { "is", "test"}, "this"), "hello world ththis this a this");
 		}
+		
+		[TestMethod]
+		public void TestEmpty()
+		{
+			Assert.AreEqual("    ".NullIfEmpty(true), null);
+			Assert.AreEqual(((string)null).NullIfEmpty(), null);
+			Assert.AreEqual("hello world this is a test".NullIfEmpty(), "hello world this is a test");
+		}
 	}
 }
