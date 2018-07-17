@@ -7,6 +7,7 @@ using System.Xml;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using OfficeOpenXml;
 
 namespace HallLibrary.Extensions
 {
@@ -63,6 +64,45 @@ namespace HallLibrary.Extensions
 		public static IEnumerable<object> GetValuesInColumn (this DataRowCollection rows, int columnOrdinal)
 		{
 			return rows.OfType<DataRow>().Select(dr => dr[columnOrdinal]);
+		}
+		#endregion
+		
+		#region Excel
+		public static ExcelRangeBase ToExcelSheet(this DataTable dataTable, ExcelWorksheet sheet, ExcelRangeBase start = null)
+		{
+			if (start == null)
+				start = sheet.Cells[@"A1"];
+			var range = start.LoadFromDataTable(dataTable, true, OfficeOpenXml.Table.TableStyles.Medium23);
+			var table = sheet.Tables.Where(t => t.Address.ToString() == range.Address.ToString()).Single();
+
+			// fix formatting of dates
+			foreach (var col in dataTable.Columns.OfType<DataColumn>())
+			{
+				if (col.DataType == typeof(DateTime))
+				{
+					sheet.Column(col.Ordinal + range.Start.Column).Style.Numberformat.Format = @"YYYY-MM-dd" + (dataTable.Rows.OfType<DataRow>().Any(dr => !(dr[col] is DBNull) && ((DateTime)dr[col]).TimeOfDay.Ticks > 0) ? @" HH:mm:ss" : string.Empty);
+				}
+			}
+
+			// freeze first row
+			sheet.View.FreezePanes(range.Start.Row + 1, range.Start.Column);
+			// expand column widths
+			sheet.Cells[range.Address].AutoFitColumns();
+			return range;
+		}
+		
+		public static void ToExcelFile(this DataTable dataTable, string path, string sheetName = null)
+		{
+			sheetName = sheetName.NullIfEmpty() ?? dataTable.TableName.NullIfEmpty() ?? @"Sheet1"; // TODO: use base file name instead of Sheet1?
+			
+			using (var package = new ExcelPackage(new FileInfo(path)))
+			{
+				using (var sheet = package.Workbook.Worksheets.Add(sheetName))
+				{
+					ToExcelSheet(dataTable, sheet);
+					package.Save();
+				}
+			}
 		}
 		#endregion
 		
