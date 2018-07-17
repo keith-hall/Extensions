@@ -287,5 +287,23 @@ namespace HallLibrary.Extensions
 				rank += dense ? 1 : grp.Count();
 			}
 		}*/
+		
+		/// <summary>
+		/// Returns the current value of an enumerable with the previous value.
+		/// </summary>
+		/// <typeparam name="TSource">The source type.</typeparam>
+		/// <typeparam name="TOutput">The output type after the <paramref name="projection" /> has been applied.</typeparam>
+		/// <param name="source">The enumerable.</param>
+		/// <param name="projection">The projection to apply.</param>
+		/// <returns>The current enumerable value with the previous value.</returns>
+		public static IEnumerable<TOutput> WithPrevious<TSource, TOutput>(this IEnumerable<TSource> source, Func<TSource, TSource, TOutput> projection)
+		{ // http://www.zerobugbuild.com/?p=213
+			var prev = default(TSource);
+			foreach (var item in source)
+			{
+				yield return projection(prev, item);
+				prev = item;
+			}
+		}
 	}
 }
