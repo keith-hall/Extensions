@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
+using System.Text;
 using System.Xml;
 using System.IO;
 using System.Threading.Tasks;
@@ -386,7 +387,10 @@ namespace HallLibrary.Extensions
 		{
 			using (var reader = new StreamReader(path))
 			{
-				return OpenCSV(reader, separator);
+				foreach (var row in OpenCSV(reader, separator))
+				{
+					yield return row;
+				}
 			}
 		}
 		
@@ -436,6 +440,7 @@ namespace HallLibrary.Extensions
 		
 		/// <summary>
 		/// Parse a few rows from the specified CSV to determine what field separator is used.
+		/// Note: the reader's state will not be maintained.
 		/// </summary>
 		/// <param name="reader">The <see cref="TextReader" /> responsible reading the CSV contents.</param>
 		/// <returns>The field separator used in the specified CSV file.</returns>
@@ -444,11 +449,23 @@ namespace HallLibrary.Extensions
 		public static string DetermineCSVSeparator (TextReader reader)
 		{
 			const int maxLinesToExamine = 3;
+			
 			var possibleSeparators = new [] { "\t", @"|", System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator, @",", @";" }.Distinct();
+			
+			// buffer the lines to examine from the source reader
+			var lines = new StringBuilder();
+			foreach (var i in Enumerable.Range(0, maxLinesToExamine))
+			{
+				var line = reader.ReadLine();
+				if (line == null)
+					break;
+				lines.AppendLine(line);
+			}
+			
 			var results = possibleSeparators.Select(s => {
 				List<int> c = null;
 				try {
-					c = OpenCSV(reader, s).Take(maxLinesToExamine).Select(r => r.Length).Distinct().ToList();
+					c = OpenCSV(new StringReader(lines.ToString()), s).Take(maxLinesToExamine).Select(r => r.Length).Distinct().ToList();
 				} catch (Microsoft.VisualBasic.FileIO.MalformedLineException) {
 					// this is the wrong separator. We will try another one, if there are separators left in the list of possible separators.
 				}
