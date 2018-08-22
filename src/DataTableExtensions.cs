@@ -386,7 +386,10 @@ namespace HallLibrary.Extensions
 		{
 			using (var reader = new StreamReader(path))
 			{
-				return OpenCSV(reader, separator);
+				foreach (var row in OpenCSV(reader, separator))
+				{
+					yield return row;
+				}
 			}
 		}
 		
